@@ -79,4 +79,13 @@ class UserController {
     User response = this.userService.unactiveUser(document, loggedUserDocument, loggedUserRole);
     return new ResponseEntity<User>(response, HttpStatus.OK);
   }
+
+  @PutMapping("active/{document}")
+  public ResponseEntity<User> activeUser(
+      @PathVariable("document") String document,
+      @RequestAttribute("loggedUserDocument") String loggedUserDocument,
+      @RequestAttribute("loggedUserRole") String loggedUserRole) {
+    User response = this.userService.activeUser(document, loggedUserDocument, loggedUserRole);
+    return new ResponseEntity<User>(response, HttpStatus.OK);
+  }
 }

@@ -100,6 +100,27 @@ public class UserService {
     return this.userRepository.save(user);
   }
 
+  public User activeUser(String document, String loggedUserDocument, String loggedUserRole) {
+    if (!UserRoles.ADMIN.toString().equals(loggedUserRole)) {
+      String errorMessage = "ONLY ADMINS CAN ACTIVE ANOTHER USER";
+      throw new RuntimeException(errorMessage);
+    }
+
+    if (document.equals(loggedUserDocument)) {
+      String errorMessage = "DOCUMENT AND LOGGED USER DOCUMENT MUST BE DIFERENT";
+      throw new RuntimeException(errorMessage);
+    }
+
+    User user = getUserByDocument(document);
+    if(user == null) {
+      String errorMessage = "USER WITH DOCUMENT "+document+" NOT FOUND";
+      throw new RuntimeException(errorMessage);
+    }
+
+    user.setIsActive(true);
+    return this.userRepository.save(user);
+  }
+
   public User update(String document, String loggedUserDocument, String loggedUserRole, UserDto userDto) {
     if (!document.equals(loggedUserDocument)) {
       String errorMessage = "USER CAN'T UPDATE ANOTHER USER DATA";
