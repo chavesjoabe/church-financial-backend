@@ -18,7 +18,8 @@ public class AccountingReportItemDto {
   private Instant balanceDate;
   private BalanceDescriptions description;
   private BalanceIncomingTypes incomingType;
-  private Float churchLeaderPercentage;
+  private Float churchFirstLeaderPercentage;
+  private Float churchSecondLeaderPercentage;
   private Float mainChurchPercentage;
   private Float ministryPercentage;
   private Float mainLeaderPercentage;
@@ -43,7 +44,8 @@ public class AccountingReportItemDto {
     this.balanceDate = balanceDate;
     this.description = description;
     this.incomingType = incomingType;
-    this.churchLeaderPercentage = (float) (value * 0.25);
+    this.churchFirstLeaderPercentage = (float) (value * 0.125);
+    this.churchSecondLeaderPercentage = (float) (value * 0.125);
     this.mainChurchPercentage = (float) (value * 0.11);
     this.ministryPercentage = (float) (value * 0.04);
     this.mainLeaderPercentage = (float) (value * 0.02);
@@ -58,7 +60,8 @@ public class AccountingReportItemDto {
     this.balanceDate = balance.getBalanceDate();
     this.description = balance.getDescription();
     this.incomingType = balance.getIncomingType();
-    this.churchLeaderPercentage = (float) (value * tax.getLeaderPercentage());
+    this.churchFirstLeaderPercentage = (float) (value * tax.getFirstLeaderPercentage());
+    this.churchSecondLeaderPercentage = (float) (value * tax.getSecondLeaderPercentage());
     this.mainChurchPercentage = (float) (value * tax.getMainChurchPercentage());
     this.ministryPercentage = (float) (value * tax.getMinistryPercentage());
     this.mainLeaderPercentage = (float) (value * tax.getMainLeaderPercentage());
@@ -128,12 +131,20 @@ public class AccountingReportItemDto {
     this.incomingType = incomingType;
   }
 
-  public Float getChurchLeaderPercentage() {
-    return churchLeaderPercentage;
+  public Float getChurchFirstLeaderPercentage() {
+    return churchFirstLeaderPercentage;
   }
 
-  public void setChurchLeaderPercentage(Float churchLeaderPercentage) {
-    this.churchLeaderPercentage = churchLeaderPercentage;
+  public void setChurchFirstLeaderPercentage(Float churchFirstLeaderPercentage) {
+    this.churchFirstLeaderPercentage = churchFirstLeaderPercentage;
+  }
+
+  public Float getChurchSecondLeaderPercentage() {
+    return churchSecondLeaderPercentage;
+  }
+
+  public void setChurchSecondLeaderPercentage(Float churchSecondLeaderPercentage) {
+    this.churchSecondLeaderPercentage = churchSecondLeaderPercentage;
   }
 
   public Float getMainChurchPercentage() {

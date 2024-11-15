@@ -10,7 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Tax {
   @Id
   private String id;
-  private Double leaderPercentage;
+  private Double firstLeaderPercentage;
+  private Double secondLeaderPercentage;
   private Double mainChurchPercentage;
   private Double ministryPercentage;
   private Double mainLeaderPercentage;
@@ -21,12 +22,14 @@ public class Tax {
   }
 
   public Tax(
-      Double leaderPercentage,
+      Double firstLeaderPercentage,
+      Double secondLeaderPercentage,
       Double mainChurchPercentage,
       Double ministryPercentage,
       Double mainLeaderPercentage) {
     this.id = UUID.randomUUID().toString();
-    this.leaderPercentage = leaderPercentage;
+    this.firstLeaderPercentage = firstLeaderPercentage;
+    this.secondLeaderPercentage = secondLeaderPercentage;
     this.mainChurchPercentage = mainChurchPercentage;
     this.ministryPercentage = ministryPercentage;
     this.mainLeaderPercentage = mainLeaderPercentage;
@@ -38,12 +41,20 @@ public class Tax {
     return id;
   }
 
-  public Double getLeaderPercentage() {
-    return leaderPercentage;
+  public Double getFirstLeaderPercentage() {
+    return firstLeaderPercentage;
   }
 
-  public void setLeaderPercentage(Double leaderPercentage) {
-    this.leaderPercentage = leaderPercentage;
+  public void setFirstLeaderPercentage(Double firstLeaderPercentage) {
+    this.firstLeaderPercentage= firstLeaderPercentage;
+  }
+
+  public Double getSecondLeaderPercentage() {
+    return secondLeaderPercentage;
+  }
+
+  public void setSecondLeaderPercentage(Double secondLeaderPercentage) {
+    this.secondLeaderPercentage = secondLeaderPercentage;
   }
 
   public Double getMainChurchPercentage() {

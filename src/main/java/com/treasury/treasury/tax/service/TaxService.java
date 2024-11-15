@@ -32,7 +32,8 @@ public class TaxService {
       List<Tax> existingTaxes = this.taxRepository.findAll();
       if (existingTaxes.size() == 0) {
         Tax tax = new Tax(
-            createTaxDto.getLeaderPercentage(),
+            createTaxDto.getFirstLeaderPercentage(),
+            createTaxDto.getSecondLeaderPercentage(),
             createTaxDto.getMainChurchPercentage(),
             createTaxDto.getMinistryPercentage(),
             createTaxDto.getMainLeaderPercentage());
@@ -40,7 +41,8 @@ public class TaxService {
       }
       Tax existingTax = existingTaxes.get(0);
 
-      existingTax.setLeaderPercentage(createTaxDto.getLeaderPercentage());
+      existingTax.setFirstLeaderPercentage(createTaxDto.getFirstLeaderPercentage());
+      existingTax.setSecondLeaderPercentage(createTaxDto.getSecondLeaderPercentage());
       existingTax.setMainChurchPercentage(createTaxDto.getMainChurchPercentage());
       existingTax.setMainLeaderPercentage(createTaxDto.getMainLeaderPercentage());
       existingTax.setMinistryPercentage(createTaxDto.getMinistryPercentage());

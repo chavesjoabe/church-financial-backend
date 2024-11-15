@@ -1,7 +1,8 @@
 package com.treasury.treasury.tax.dto;
 
 public class CreateTaxDto {
-  private Double leaderPercentage;
+  private Double firstLeaderPercentage;
+  private Double secondLeaderPercentage;
   private Double mainChurchPercentage;
   private Double ministryPercentage;
   private Double mainLeaderPercentage;
@@ -10,23 +11,32 @@ public class CreateTaxDto {
   }
 
   public CreateTaxDto(
-
-      Double leaderPercentage,
+      Double firstLeaderPercentage,
+      Double secondLeaderPercentage,
       Double mainChurchPercentage,
       Double ministryPercentage,
       Double mainLeaderPercentage) {
-    this.leaderPercentage = leaderPercentage;
+    this.firstLeaderPercentage = firstLeaderPercentage;
+    this.secondLeaderPercentage = secondLeaderPercentage;
     this.mainChurchPercentage = mainChurchPercentage;
     this.ministryPercentage = ministryPercentage;
     this.mainLeaderPercentage = mainLeaderPercentage;
   }
 
-  public Double getLeaderPercentage() {
-    return leaderPercentage;
+  public Double getFirstLeaderPercentage() {
+    return firstLeaderPercentage;
   }
 
-  public void setLeaderPercentage(Double leaderPercentage) {
-    this.leaderPercentage = leaderPercentage;
+  public void setFirstLeaderPercentage(Double firstLeaderPercentage) {
+    this.firstLeaderPercentage= firstLeaderPercentage;
+  }
+
+  public Double getSecondLeaderPercentage() {
+    return secondLeaderPercentage;
+  }
+
+  public void setSecondLeaderPercentage(Double firstLeaderPercentage) {
+    this.secondLeaderPercentage = firstLeaderPercentage;
   }
 
   public Double getMainChurchPercentage() {
