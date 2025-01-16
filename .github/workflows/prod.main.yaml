@@ -57,12 +57,10 @@ jobs:
         # Upload the new JAR to EC2
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
 
-        # Set environment variables
+        # Start the new application with environment variables
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
-          export APPLICATION_NAME=$APPLICATION_NAME
-          export DATABASE_URL=$DATABASE_URL
-          export DB_NAME=$DB_NAME
-
-          # Start the new application
+          APPLICATION_NAME=$APPLICATION_NAME \
+          DATABASE_URL=$DATABASE_URL \
+          DB_NAME=$DB_NAME \
           nohup java -jar $APP_DIR/app.jar > $APP_DIR/app.log 2>&1 &
         EOF
