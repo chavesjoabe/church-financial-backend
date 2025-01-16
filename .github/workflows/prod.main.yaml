@@ -46,7 +46,7 @@ jobs:
         chmod 600 private_key.pem
 
         # Ensure the target directory exists on EC2
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR $BACKUP_DIR"
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ ! -d $APP_DIR ]; then mkdir -p $APP_DIR; fi"
 
         # Stop the current application
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "pkill -f 'java -jar' || true"
