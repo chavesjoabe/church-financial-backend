@@ -48,8 +48,8 @@ jobs:
         # Ensure the target directory exists on EC2
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ ! -d $APP_DIR ]; then mkdir -p $APP_DIR; fi"
 
-        # Stop the current application
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "pkill -f 'java -jar' || true"
+        # Delete the existing application JAR file if it exists
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ -f $APP_DIR/app.jar ]; then rm -f $APP_DIR/app.jar; fi"
 
         # Backup the current application
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ -f $APP_DIR/app.jar ]; then mv $APP_DIR/app.jar $BACKUP_DIR/app-$(date +%Y%m%d%H%M%S).jar; fi"
