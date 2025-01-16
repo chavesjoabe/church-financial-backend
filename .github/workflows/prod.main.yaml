@@ -35,6 +35,10 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
+        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+
       run: |
         # Create SSH key file
         echo "$EC2_KEY" > private_key.pem
