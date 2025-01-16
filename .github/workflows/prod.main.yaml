@@ -35,6 +35,7 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
+        BACKUP_DIR: backup
         APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DB_NAME: ${{ secrets.DB_NAME }}
