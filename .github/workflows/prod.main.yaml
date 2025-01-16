@@ -44,9 +44,11 @@ jobs:
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
 
+        # Ensure the target directory exists on EC2
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
+
         # Upload the JAR to EC2
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
-
 
         # Connect to EC2 and restart the application
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
