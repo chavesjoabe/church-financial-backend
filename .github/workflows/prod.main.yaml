@@ -1,0 +1,58 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Deploy on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'  # Set to Java 21
+        distribution: 'temurin'
+
+    - name: Build the application
+      run: |
+        ./mvnw clean package
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: spring-app
+        path: target/*.jar
+
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
+        APP_DIR: ${{ secrets.APP_DIR }}
+      run: |
+        # Create SSH key file
+        echo "$EC2_KEY" > private_key.pem
+        chmod 600 private_key.pem
+
+        # Upload the JAR to EC2
+        scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
+
+
+        # Connect to EC2 and restart the application
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
+
+          # Setting up environment variables
+          export APPLICATION_NAME=$APPLICATION_NAME
+          export DATABASE_URL=$DATABASE_URL
+          export DB_NAME=$DB_NAME
+
+          pkill -f 'java -jar' || true
+          nohup java -jar $APP_DIR/app.jar > $APP_DIR/app.log 2>&1 &
+        EOF
+

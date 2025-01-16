@@ -9,6 +9,8 @@ import com.treasury.treasury.user.constants.UserRoles;
 import com.treasury.treasury.user.dto.LoginDto;
 import com.treasury.treasury.user.dto.LoginResponse;
 import com.treasury.treasury.user.dto.UserDto;
+import com.treasury.treasury.user.exceptions.UserAlreadyExistsException;
+import com.treasury.treasury.user.exceptions.UserNotFoundException;
 import com.treasury.treasury.user.repository.UserRepository;
 import com.treasury.treasury.user.schema.User;
 import com.treasury.treasury.utils.JwtUtil;
@@ -24,31 +26,25 @@ public class UserService {
   }
 
   public User create(UserDto userDto) {
-    try {
-      Optional<User> userAlreadyExists = this.userRepository.findByDocument(userDto.getDocument());
+    Optional<User> userAlreadyExists = this.userRepository.findByDocument(userDto.getDocument());
 
-      if (userAlreadyExists.isPresent()) {
-        String errorMessage = "USER WITH DOCUMENT [" + userDto.getDocument() + "] ALREADY EXISTS";
-        throw new IllegalArgumentException(errorMessage);
-      }
-
-      User user = new User(
-          userDto.getName(),
-          userDto.getEmail(),
-          userDto.getDocument(),
-          userDto.getRole(),
-          userDto.getPassword());
-
-      return this.userRepository.save(user);
-    } catch (Exception e) {
-      String errorMessage = "Error on create user - " + e.getMessage();
-      throw new RuntimeException(errorMessage);
+    if (userAlreadyExists.isPresent()) {
+      throw new UserAlreadyExistsException(userDto.getDocument());
     }
+
+    User user = new User(
+        userDto.getName(),
+        userDto.getEmail(),
+        userDto.getDocument(),
+        userDto.getRole(),
+        userDto.getPassword());
+
+    return this.userRepository.save(user);
   }
 
   public User getUserByDocument(String document) {
     try {
-      return this.userRepository.findByDocument(document).orElseThrow(() -> new RuntimeException("User Not found"));
+      return this.userRepository.findByDocument(document).orElseThrow(() -> new UserNotFoundException(document));
     } catch (Exception e) {
       String errorMessage = "Error on get user by document - " + e.getMessage();
       throw new RuntimeException(errorMessage);
@@ -91,8 +87,8 @@ public class UserService {
     }
 
     User user = getUserByDocument(document);
-    if(user == null) {
-      String errorMessage = "USER WITH DOCUMENT "+document+" NOT FOUND";
+    if (user == null) {
+      String errorMessage = "USER WITH DOCUMENT " + document + " NOT FOUND";
       throw new RuntimeException(errorMessage);
     }
 
@@ -112,8 +108,8 @@ public class UserService {
     }
 
     User user = getUserByDocument(document);
-    if(user == null) {
-      String errorMessage = "USER WITH DOCUMENT "+document+" NOT FOUND";
+    if (user == null) {
+      String errorMessage = "USER WITH DOCUMENT " + document + " NOT FOUND";
       throw new RuntimeException(errorMessage);
     }
 
@@ -129,8 +125,8 @@ public class UserService {
 
     User user = getUserByDocument(document);
 
-    if(user == null) {
-      String errorMessage = "USER WITH DOCUMENT "+document+" NOT FOUND";
+    if (user == null) {
+      String errorMessage = "USER WITH DOCUMENT " + document + " NOT FOUND";
       throw new RuntimeException(errorMessage);
     }
 
