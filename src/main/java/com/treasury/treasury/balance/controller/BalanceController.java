@@ -32,6 +32,11 @@ public class BalanceController {
     this.balanceService = balanceService;
   }
 
+  @GetMapping("/health")
+  public ResponseEntity<String> health() {
+    return new ResponseEntity<String>("OK", HttpStatus.OK);
+  }
+
   @PostMapping("/create")
   public ResponseEntity<Balance> create(
       @RequestBody BalanceDto balanceDto,
