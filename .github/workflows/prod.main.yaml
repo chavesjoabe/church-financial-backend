@@ -45,20 +45,23 @@ jobs:
         chmod 600 private_key.pem
 
         # Ensure the target directory exists on EC2
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR $BACKUP_DIR"
 
-        # Upload the JAR to EC2
+        # Stop the current application
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "pkill -f 'java -jar' || true"
+
+        # Backup the current application
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ -f $APP_DIR/app.jar ]; then mv $APP_DIR/app.jar $BACKUP_DIR/app-$(date +%Y%m%d%H%M%S).jar; fi"
+
+        # Upload the new JAR to EC2
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
 
-        # Connect to EC2 and restart the application
+        # Set environment variables
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
-
-          # Setting up environment variables
           export APPLICATION_NAME=$APPLICATION_NAME
           export DATABASE_URL=$DATABASE_URL
           export DB_NAME=$DB_NAME
 
-          pkill -f 'java -jar' || true
+          # Start the new application
           nohup java -jar $APP_DIR/app.jar > $APP_DIR/app.log 2>&1 &
         EOF
-
