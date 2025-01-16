@@ -21,7 +21,7 @@ jobs:
 
     - name: Build the application
       run: |
-        ./mvnw clean package -DSkipTests
+        ./mvnw clean package -DskipTests
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
