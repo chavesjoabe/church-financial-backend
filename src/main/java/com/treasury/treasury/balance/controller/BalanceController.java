@@ -34,7 +34,7 @@ public class BalanceController {
 
   @GetMapping("/health")
   public ResponseEntity<String> health() {
-    return new ResponseEntity<String>("HEALTH - OK", HttpStatus.OK);
+    return new ResponseEntity<String>("OK", HttpStatus.OK);
   }
 
   @PostMapping("/create")
