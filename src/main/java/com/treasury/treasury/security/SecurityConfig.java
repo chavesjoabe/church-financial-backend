@@ -20,8 +20,8 @@ public class SecurityConfig {
         .csrf((csrf) -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("api/user/login").permitAll()
-            .requestMatchers("api/balance/health").permitAll()
+            .requestMatchers("/api/user/login").permitAll()
+            .requestMatchers("/api/balance/health").permitAll()
             .anyRequest().authenticated()
             ).cors();
 
