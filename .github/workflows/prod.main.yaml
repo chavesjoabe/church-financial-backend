@@ -48,9 +48,9 @@ jobs:
         #!/bin/bash
 
         # Export environment variables
-        export APPLICATION_NAME="{{ secrets.APPLICATION_NAME }}"
-        export DATABASE_URL="{{ secrets.DATABASE_URL }}"
-        export DB_NAME="{{ secrets.DB_NAME }}"
+        export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
+        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
+        export DB_NAME="${{ secrets.DB_NAME }}"
 
         # Check if application is already running
         if pgrep -f "java -jar ${APP_DIR}/app.jar" > /dev/null; then
