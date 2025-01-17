@@ -1,34 +1,31 @@
 name: Deploy to AWS EC2
-
 on:
   push:
     branches:
-      - main  # Deploy on push to the main branch
-
+      - main
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-
+    
     - name: Set up JDK
       uses: actions/setup-java@v3
       with:
-        java-version: '21'  # Set to Java 21
+        java-version: '21'
         distribution: 'temurin'
-
+    
     - name: Build the application
       run: |
         ./mvnw clean package -DskipTests
-
+    
     - name: Upload artifact
       uses: actions/upload-artifact@v3
       with:
         name: spring-app
         path: target/*.jar
-
+    
     - name: Deploy to EC2
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -39,25 +36,44 @@ jobs:
         APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DB_NAME: ${{ secrets.DB_NAME }}
-
       run: |
         # Create SSH key file
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
-
+        
+        # Create environment variable file
+        echo "APPLICATION_NAME=$APPLICATION_NAME" > env.properties
+        echo "DATABASE_URL=$DATABASE_URL" >> env.properties
+        echo "DB_NAME=$DB_NAME" >> env.properties
+        
         # Ensure the target directory exists on EC2
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ ! -d $APP_DIR ]; then mkdir -p $APP_DIR; fi"
-
-        # Delete the existing application JAR file if it exists
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ -f $APP_DIR/app.jar ]; then rm -f $APP_DIR/app.jar; fi"
-
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
+        
+        # Stop the existing application if running
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "pkill -f 'java -jar $APP_DIR/app.jar' || true"
+        
+        # Upload the environment variables file
+        scp -o StrictHostKeyChecking=no -i private_key.pem env.properties $EC2_USER@$EC2_HOST:$APP_DIR/
+        
         # Upload the new JAR to EC2
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
-
-        # Start the new application with environment variables
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
-          APPLICATION_NAME=$APPLICATION_NAME \
-          DATABASE_URL=$DATABASE_URL \
-          DB_NAME=$DB_NAME \
-          nohup java -jar $APP_DIR/app.jar > $APP_DIR/app.log 2>&1 &
+        
+        # Create a startup script
+        cat << 'EOF' > start-application.sh
+        #!/bin/bash
+        cd ${APP_DIR}
+        # Load environment variables
+        set -a
+        source env.properties
+        set +a
+        
+        # Start the application with environment variables and redirect output
+        nohup java -jar app.jar > app.log 2>&1 &
+        
+        # Save the PID to a file
+        echo $! > app.pid
         EOF
+        
+        # Upload and execute the startup script
+        scp -o StrictHostKeyChecking=no -i private_key.pem start-application.sh $EC2_USER@$EC2_HOST:$APP_DIR/
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "chmod +x $APP_DIR/start-application.sh && cd $APP_DIR && ./start-application.sh"
