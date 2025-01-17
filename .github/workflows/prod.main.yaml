@@ -37,43 +37,86 @@ jobs:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         DB_NAME: ${{ secrets.DB_NAME }}
       run: |
+        # Debug information
+        echo "Deploying to host: $EC2_HOST"
+        echo "Using user: $EC2_USER"
+        echo "Application directory: $APP_DIR"
+        
         # Create SSH key file
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
+        
+        # Test SSH connection
+        if ! ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'SSH connection successful'"; then
+          echo "Failed to establish SSH connection"
+          exit 1
+        fi
         
         # Create environment variable file
         echo "APPLICATION_NAME=$APPLICATION_NAME" > env.properties
         echo "DATABASE_URL=$DATABASE_URL" >> env.properties
         echo "DB_NAME=$DB_NAME" >> env.properties
         
-        # Ensure the target directory exists on EC2
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
-        
-        # Stop the existing application if running
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "pkill -f 'java -jar $APP_DIR/app.jar' || true"
+        # Check if directory and files exist, create only if needed
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'ENDSSH'
+          # Create APP_DIR if it doesn't exist
+          if [ ! -d "$APP_DIR" ]; then
+            echo "Creating application directory..."
+            mkdir -p "$APP_DIR"
+          else
+            echo "Application directory already exists"
+          fi
+          
+          # Check if application is already running
+          if pgrep -f "java -jar $APP_DIR/app.jar" > /dev/null; then
+            echo "Application is already running"
+            exit 0
+          else
+            echo "Application is not running, proceeding with deployment"
+          fi
+        ENDSSH
         
         # Upload the environment variables file
+        echo "Uploading environment variables file..."
         scp -o StrictHostKeyChecking=no -i private_key.pem env.properties $EC2_USER@$EC2_HOST:$APP_DIR/
         
-        # Upload the new JAR to EC2
-        scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
+        # Upload the new JAR to EC2 only if it doesn't exist
+        echo "Checking and uploading JAR file..."
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "if [ ! -f $APP_DIR/app.jar ]; then exit 0; else exit 1; fi"
+        if [ $? -eq 0 ]; then
+          echo "Uploading new JAR file..."
+          scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
+        else
+          echo "JAR file already exists, skipping upload"
+        fi
         
-        # Create a startup script
+        # Create and upload startup script
+        echo "Creating startup script..."
         cat << 'EOF' > start-application.sh
         #!/bin/bash
-        cd ${APP_DIR}
+        cd "${APP_DIR}"
+        
+        # Check if application is already running
+        if pgrep -f "java -jar ${APP_DIR}/app.jar" > /dev/null; then
+          echo "Application is already running"
+          exit 0
+        fi
+        
         # Load environment variables
         set -a
         source env.properties
         set +a
         
         # Start the application with environment variables and redirect output
+        echo "Starting application..."
         nohup java -jar app.jar > app.log 2>&1 &
         
         # Save the PID to a file
         echo $! > app.pid
+        echo "Application started with PID: $(cat app.pid)"
         EOF
         
         # Upload and execute the startup script
+        echo "Uploading and executing startup script..."
         scp -o StrictHostKeyChecking=no -i private_key.pem start-application.sh $EC2_USER@$EC2_HOST:$APP_DIR/
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "chmod +x $APP_DIR/start-application.sh && cd $APP_DIR && ./start-application.sh"
