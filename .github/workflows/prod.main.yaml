@@ -47,31 +47,65 @@ jobs:
         cat << 'EOF' > start-application.sh
         #!/bin/bash
 
-        # Export environment variables
-        export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
-        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
-        export DB_NAME="${{ secrets.DB_NAME }}"
-
-        # Check if application is already running
-        if pgrep -f "java -jar ${APP_DIR}/app.jar" > /dev/null; then
-          echo "Application is already running"
-          exit 0
+        echo "Stopping any existing application instance..."
+        
+        # Kill existing process if running
+        if [ -f "${APP_DIR}/app.pid" ]; then
+          OLD_PID=$(cat "${APP_DIR}/app.pid")
+          if ps -p $OLD_PID > /dev/null; then
+            echo "Killing process $OLD_PID"
+            kill -15 $OLD_PID
+            sleep 5
+            # Force kill if still running
+            if ps -p $OLD_PID > /dev/null; then
+              echo "Force killing process $OLD_PID"
+              kill -9 $OLD_PID
+            fi
+          fi
+          rm "${APP_DIR}/app.pid"
         fi
 
-        # Start the application with environment variables
-        echo "Starting application..."
+        # Additional check for any java process running the app.jar
+        EXISTING_PID=$(pgrep -f "java -jar ${APP_DIR}/app.jar")
+        if [ ! -z "$EXISTING_PID" ]; then
+          echo "Found additional process $EXISTING_PID, killing it..."
+          kill -15 $EXISTING_PID
+          sleep 5
+          # Force kill if still running
+          if ps -p $EXISTING_PID > /dev/null; then
+            echo "Force killing process $EXISTING_PID"
+            kill -9 $EXISTING_PID
+          fi
+        fi
+
+        # Export environment variables
+        export APPLICATION_NAME=${{ secrets.APPLICATION_NAME }}
+        export DATABASE_URL=${{ secrets.DATABASE_URL }}
+        export DB_NAME=${{ secrets.DB_NAME }}
+
+        echo "Starting new application instance..."
         cd "${APP_DIR}"
         nohup java -jar app.jar > app.log 2>&1 &
 
         # Save the PID to a file
         echo $! > app.pid
-        echo "Application started with PID: $(cat app.pid)"
+        NEW_PID=$(cat app.pid)
+        echo "Application started with PID: $NEW_PID"
+
+        # Verify the process is running
+        sleep 5
+        if ps -p $NEW_PID > /dev/null; then
+          echo "Application successfully started and running"
+        else
+          echo "Failed to start application"
+          exit 1
+        fi
         EOF
         
         # Ensure the target directory exists on EC2
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
         
-        # Upload the JAR file only if it doesn't exist
+        # Upload the JAR file
         echo "Uploading JAR file..."
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
         
