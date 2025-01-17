@@ -47,55 +47,51 @@ jobs:
         cat << 'EOF' > start-application.sh
         #!/bin/bash
 
-        echo "Stopping any existing application instance..."
+        echo "Checking for running application..."
         
-        # Kill existing process if running
-        if [ -f "${APP_DIR}/app.pid" ]; then
-          OLD_PID=$(cat "${APP_DIR}/app.pid")
-          if ps -p $OLD_PID > /dev/null; then
-            echo "Killing process $OLD_PID"
-            kill -15 $OLD_PID
-            sleep 5
-            # Force kill if still running
-            if ps -p $OLD_PID > /dev/null; then
-              echo "Force killing process $OLD_PID"
-              kill -9 $OLD_PID
-            fi
-          fi
-          rm "${APP_DIR}/app.pid"
-        fi
-
-        # Additional check for any java process running the app.jar
-        EXISTING_PID=$(pgrep -f "java -jar ${APP_DIR}/app.jar")
-        if [ ! -z "$EXISTING_PID" ]; then
-          echo "Found additional process $EXISTING_PID, killing it..."
-          kill -15 $EXISTING_PID
+        # Find and kill the existing process
+        EXISTING_PROCESS=$(ps aux | grep app.jar | grep -v grep)
+        if [ ! -z "$EXISTING_PROCESS" ]; then
+          echo "Found running application:"
+          echo "$EXISTING_PROCESS"
+          
+          # Extract PID from ps output (second column)
+          OLD_PID=$(echo "$EXISTING_PROCESS" | awk '{print $2}')
+          echo "Stopping process with PID: $OLD_PID"
+          
+          # Try graceful shutdown first
+          kill -15 $OLD_PID
           sleep 5
-          # Force kill if still running
-          if ps -p $EXISTING_PID > /dev/null; then
-            echo "Force killing process $EXISTING_PID"
-            kill -9 $EXISTING_PID
+          
+          # Check if process is still running
+          if ps -p $OLD_PID > /dev/null; then
+            echo "Process still running, force killing it..."
+            kill -9 $OLD_PID
+            sleep 2
           fi
+        else
+          echo "No running application found"
         fi
 
         # Export environment variables
-        export APPLICATION_NAME=${{ secrets.APPLICATION_NAME }}
-        export DATABASE_URL=${{ secrets.DATABASE_URL }}
-        export DB_NAME=${{ secrets.DB_NAME }}
+        export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
+        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
+        export DB_NAME="${{ secrets.DB_NAME }}"
 
         echo "Starting new application instance..."
         cd "${APP_DIR}"
         nohup java -jar app.jar > app.log 2>&1 &
 
-        # Save the PID to a file
-        echo $! > app.pid
-        NEW_PID=$(cat app.pid)
+        # Save the PID and verify the process started
+        NEW_PID=$!
+        echo $NEW_PID > app.pid
         echo "Application started with PID: $NEW_PID"
 
         # Verify the process is running
         sleep 5
-        if ps -p $NEW_PID > /dev/null; then
+        if ps aux | grep -v grep | grep app.jar > /dev/null; then
           echo "Application successfully started and running"
+          ps aux | grep app.jar | grep -v grep
         else
           echo "Failed to start application"
           exit 1
