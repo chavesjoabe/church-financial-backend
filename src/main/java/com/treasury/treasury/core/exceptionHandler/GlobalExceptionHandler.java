@@ -8,6 +8,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.treasury.treasury.core.exceptionHandler.constants.ErrorConstantsEnum;
 import com.treasury.treasury.user.exceptions.UserAlreadyExistsException;
 import com.treasury.treasury.user.exceptions.UserNotFoundException;
 
@@ -19,9 +20,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       WebRequest request) {
     ApiError error = new ApiError(
         exception.getMessage(),
-        "USER ALREADY EXISTS",
+        ErrorConstantsEnum.USER_ALREADY_EXISTS.toString(),
         ((ServletWebRequest) request).getRequest().getRequestURI(),
         HttpStatus.CONFLICT.value());
+    exception.printStackTrace();
     return new ResponseEntity<>(error, HttpStatus.CONFLICT);
   }
 
@@ -30,9 +32,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       WebRequest request) {
     ApiError error = new ApiError(
         exception.getMessage(),
-        "USER NOT FOUND",
+        //"USER NOT FOUND",
+        ErrorConstantsEnum.USER_NOT_FOUND.toString(),
         ((ServletWebRequest) request).getRequest().getRequestURI(),
         HttpStatus.NOT_FOUND.value());
+    exception.printStackTrace();
     return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
   }
 
@@ -41,10 +45,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       Exception ex,
       WebRequest request) {
     ApiError error = new ApiError(
-        "DEU MUITO RUIM",
+        // "INTERNAL SERVER ERROR" + ex.getMessage(),
+        ErrorConstantsEnum.INTERNAL_SERVER_ERROR.toString(),
         "Internal Server Error",
         ((ServletWebRequest) request).getRequest().getRequestURI(),
         HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+    ex.printStackTrace();
     return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
