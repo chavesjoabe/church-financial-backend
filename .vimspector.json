@@ -1,0 +1,28 @@
+{
+  "configurations": {
+    "Java Attach": {
+      "adapter": "vscode-java",
+      "filetypes": [ "java" ],
+      "configuration": {
+        "request": "attach",
+        "type": "java",
+        "hostName": "localhost",
+        "port": 8000,
+        "projectName": "${workspaceFolder}",
+        "sourcePaths": [
+          "${workspaceFolder}/src/main/java"
+        ]
+      }
+    }
+  },
+  "adapters": {
+    "vscode-java": {
+      "name": "vscode-java",
+      "port": "${unusedLocalPort}",
+      "command": [
+        "java-debug-server",
+        "${unusedLocalPort}"
+      ]
+    }
+  }
+}

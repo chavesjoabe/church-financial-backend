@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.treasury.treasury.balance.dto.AccountingReportItemDto;
+import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
@@ -95,13 +96,14 @@ public class BalanceController {
   }
 
   @GetMapping("/report/accounting")
-  public ResponseEntity<List<AccountingReportItemDto>> extractAccountingReport(
+  public ResponseEntity<AccountingReportItemV2Dto> extractAccountingReportV2(
       @RequestParam("startDate") String startDate,
       @RequestParam("endDate") String endDate) {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
-    List<AccountingReportItemDto> report = this.balanceService.extractAccountingReport(balanceStartDate, balanceEndDate);
-    return new ResponseEntity<List<AccountingReportItemDto>>(report, HttpStatus.OK);
+    AccountingReportItemV2Dto response = 
+      this.balanceService.extractAccountingReportV2(balanceStartDate, balanceEndDate);
+    return new ResponseEntity<AccountingReportItemV2Dto>(response, HttpStatus.OK);
   }
 
   @GetMapping("/report/incoming_outgoing")

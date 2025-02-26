@@ -10,6 +10,7 @@ import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
 import com.treasury.treasury.balance.dto.AccountingReportItemDto;
+import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
@@ -161,7 +162,7 @@ public class BalanceService {
             BalanceTypes.OUTGOING);
   }
 
-  public List<AccountingReportItemDto> extractAccountingReport(Instant startDate, Instant endDate) {
+  public AccountingReportItemV2Dto extractAccountingReportV2(Instant startDate, Instant endDate) {
     try {
       List<Balance> balances = this.balanceRepository
           .findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(
@@ -172,15 +173,28 @@ public class BalanceService {
               BalanceIncomingTypes.OFICIAL);
 
       Tax tax = taxService.getTaxes();
-      List<AccountingReportItemDto> response = balances.stream()
+
+      List<AccountingReportItemDto> responseBalances = balances.stream()
           .map(balance -> new AccountingReportItemDto(balance, tax))
           .toList();
-      return response;
+
+
+      return AccountingReportItemV2Dto
+        .builder()
+        .balances(responseBalances)
+        .churchFirstLeaderPercentage(responseBalances)
+        .churchSecondLeaderPercentageTotal(responseBalances)
+        .mainChurchPercentageTotal(responseBalances)
+        .mainLeaderPercentageTotal(responseBalances)
+        .ministryPercentageTotal(responseBalances)
+        .total(responseBalances)
+        .build();
     } catch (Exception e) {
       String errorMessage = "ERROR ON EXTRACT BALANCE" + e.getMessage();
       throw new RuntimeException(errorMessage);
     }
   }
+
 
   public List<Balance> findAllPendingBalances(String loggedUserDocument, String loggedUserRole) {
     if (UserRoles.COMMON.toString().equals(loggedUserRole)) {
