@@ -178,28 +178,28 @@ public class BalanceService {
           .map(balance -> new AccountingReportItemDto(balance, tax))
           .toList();
 
-
       return AccountingReportItemV2Dto
-        .builder()
-        .balances(responseBalances)
-        .churchFirstLeaderPercentage(responseBalances)
-        .churchSecondLeaderPercentageTotal(responseBalances)
-        .mainChurchPercentageTotal(responseBalances)
-        .mainLeaderPercentageTotal(responseBalances)
-        .ministryPercentageTotal(responseBalances)
-        .total(responseBalances)
-        .build();
-    } catch (Exception e) {
-      String errorMessage = "ERROR ON EXTRACT BALANCE" + e.getMessage();
+          .builder()
+          .balances(responseBalances)
+          .churchFirstLeaderPercentage(responseBalances)
+          .churchSecondLeaderPercentageTotal(responseBalances)
+          .mainChurchPercentageTotal(responseBalances)
+          .mainLeaderPercentageTotal(responseBalances)
+          .ministryPercentageTotal(responseBalances)
+          .total(responseBalances)
+          .build();
+    } catch (Exception exception) {
+      String errorMessage = "ERROR ON EXTRACT BALANCE" + exception.getMessage();
       throw new RuntimeException(errorMessage);
     }
   }
 
-
   public List<Balance> findAllPendingBalances(String loggedUserDocument, String loggedUserRole) {
     if (UserRoles.COMMON.toString().equals(loggedUserRole)) {
-      return this.balanceRepository.findByStatusAndResponsibleOrderByBalanceDate(BalanceStatus.PENDING,
-          loggedUserDocument);
+      return this.balanceRepository
+          .findByStatusAndResponsibleOrderByBalanceDate(
+              BalanceStatus.PENDING,
+              loggedUserDocument);
     }
 
     return this.balanceRepository.findByStatusOrderByBalanceDate(BalanceStatus.PENDING);

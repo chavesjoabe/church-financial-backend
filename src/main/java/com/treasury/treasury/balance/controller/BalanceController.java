@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.treasury.treasury.balance.dto.AccountingReportItemDto;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.schema.Balance;
@@ -35,7 +34,8 @@ public class BalanceController {
 
   @GetMapping("/health")
   public ResponseEntity<String> health() {
-    return new ResponseEntity<String>("HEALTH - OK", HttpStatus.OK);
+    String response = "HEALTH - OK";
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/create")
@@ -43,6 +43,7 @@ public class BalanceController {
       @RequestBody BalanceDto balanceDto,
       @RequestAttribute("loggedUserDocument") String loggedUserDocument,
       @RequestAttribute("loggedUserRole") String loggedUserRole) {
+
     Balance balance = this.balanceService.create(balanceDto, loggedUserDocument, loggedUserRole);
     return new ResponseEntity<Balance>(balance, HttpStatus.CREATED);
   }
@@ -101,8 +102,11 @@ public class BalanceController {
       @RequestParam("endDate") String endDate) {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
-    AccountingReportItemV2Dto response = 
-      this.balanceService.extractAccountingReportV2(balanceStartDate, balanceEndDate);
+    AccountingReportItemV2Dto response = this.balanceService
+        .extractAccountingReportV2(
+            balanceStartDate,
+            balanceEndDate);
+
     return new ResponseEntity<AccountingReportItemV2Dto>(response, HttpStatus.OK);
   }
 
@@ -112,7 +116,11 @@ public class BalanceController {
       @RequestParam("endDate") String endDate) {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
-    List<Balance> balances = this.balanceService.findAllBalancesByDate(balanceStartDate, balanceEndDate);
+    List<Balance> balances = this.balanceService
+        .findAllBalancesByDate(
+            balanceStartDate,
+            balanceEndDate);
+
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
@@ -122,7 +130,11 @@ public class BalanceController {
       @RequestParam("endDate") String endDate) {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
-    List<Balance> balances = this.balanceService.findAllIncomingBalancesByDate(balanceStartDate, balanceEndDate);
+    List<Balance> balances = this.balanceService
+        .findAllIncomingBalancesByDate(
+            balanceStartDate,
+            balanceEndDate);
+
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
@@ -132,7 +144,11 @@ public class BalanceController {
       @RequestParam("endDate") String endDate) {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
-    List<Balance> balances = this.balanceService.findAllOutgoingBalancesByDate(balanceStartDate, balanceEndDate);
+    List<Balance> balances = this.balanceService
+        .findAllOutgoingBalancesByDate(
+            balanceStartDate,
+            balanceEndDate);
+
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 }

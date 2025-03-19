@@ -34,3 +34,7 @@ build/
 
 # ENV FILES
 .env
+
+### VIM FILES ###
+.vimspector 2.json
+.vimspector.json
