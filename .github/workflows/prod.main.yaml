@@ -22,11 +22,7 @@ jobs:
 
     - name: Run Unit tests
       run: |
-
         export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
-        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
-        export DB_NAME="${{ secrets.DB_NAME }}"
-
         ./mvnw clean test
     
     - name: Upload artifact
