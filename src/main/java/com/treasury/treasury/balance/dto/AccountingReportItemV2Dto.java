@@ -9,7 +9,9 @@ public class AccountingReportItemV2Dto {
   private float mainChurchPercentageTotal;
   private float ministryPercentageTotal;
   private float mainLeaderPercentageTotal;
+  private List<AccountingReportItemDto> transferBalances;
   private float total;
+  private float transferBalancesTotal;
 
   public AccountingReportItemV2Dto() {
   }
@@ -21,9 +23,10 @@ public class AccountingReportItemV2Dto {
     this.mainLeaderPercentageTotal = builder.mainLeaderPercentageTotal;
     this.mainChurchPercentageTotal = builder.mainChurchPercentageTotal;
     this.ministryPercentageTotal = builder.ministryPercentageTotal;
+    this.transferBalances = builder.transferBalances;
+    this.transferBalancesTotal = builder.transferBalancesTotal;
     this.total = builder.total;
   }
-
 
   public List<AccountingReportItemDto> getBalances() {
     return balances;
@@ -31,6 +34,14 @@ public class AccountingReportItemV2Dto {
 
   public void setBalances(List<AccountingReportItemDto> balances) {
     this.balances = balances;
+  }
+
+  public List<AccountingReportItemDto> getTransferBalances() {
+    return transferBalances;
+  }
+
+  public void setTransferBalances(List<AccountingReportItemDto> transferBalances) {
+    this.transferBalances = transferBalances;
   }
 
   public float getChurchFirstLeaderPercentageTotal() {
@@ -81,6 +92,13 @@ public class AccountingReportItemV2Dto {
     this.total = total;
   }
 
+  public float getTransferBalancesTotal() {
+    return transferBalancesTotal;
+  }
+
+  public void setTransferBalancesTotal(float transferBalanceTotal) {
+    this.transferBalancesTotal = transferBalanceTotal;
+  }
 
   public static class AccountingReportItemBuilder {
     private List<AccountingReportItemDto> balances;
@@ -89,13 +107,20 @@ public class AccountingReportItemV2Dto {
     private float mainChurchPercentageTotal;
     private float ministryPercentageTotal;
     private float mainLeaderPercentageTotal;
+    private List<AccountingReportItemDto> transferBalances;
     private float total;
+    private float transferBalancesTotal;
 
     public AccountingReportItemBuilder() {
     }
 
     public AccountingReportItemBuilder balances(List<AccountingReportItemDto> balances) {
       this.balances = balances;
+      return this;
+    }
+
+    public AccountingReportItemBuilder transferBalances(List<AccountingReportItemDto> transferBalances) {
+      this.transferBalances = transferBalances;
       return this;
     }
 
@@ -161,6 +186,17 @@ public class AccountingReportItemV2Dto {
           .reduce(0f, Float::sum);
 
       this.total = result;
+
+      return this;
+    }
+
+    public AccountingReportItemBuilder transferBalancesTotal(List<AccountingReportItemDto> balances) {
+      float result = this.transferBalances
+          .stream()
+          .map(AccountingReportItemDto::getValue)
+          .reduce(0f, Float::sum);
+
+      this.transferBalancesTotal = result;
 
       return this;
     }

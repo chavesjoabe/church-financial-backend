@@ -54,7 +54,9 @@ public class BalanceService {
 
   public Balance findById(String id) {
     try {
-      return this.balanceRepository.findById(id).orElseThrow(() -> new RuntimeException("Balance not found"));
+      return this.balanceRepository
+          .findById(id)
+          .orElseThrow(() -> new RuntimeException("Balance not found"));
     } catch (Exception e) {
       String errorMessage = "Error on find Balance by ID " + e.getMessage();
       throw new RuntimeException(errorMessage);
@@ -62,7 +64,10 @@ public class BalanceService {
   }
 
   @Transactional
-  public Balance approveBalance(String id, String loggedUserDocument, String loggedUserRole) {
+  public Balance approveBalance(
+      String id,
+      String loggedUserDocument,
+      String loggedUserRole) {
     try {
       Balance balance = this.balanceRepository.findById(id)
           .orElseThrow(() -> new RuntimeException("Balance not found"));
@@ -172,7 +177,19 @@ public class BalanceService {
               BalanceTypes.INCOMING,
               BalanceIncomingTypes.OFICIAL);
 
+      List<Balance> transferBalances = this.balanceRepository
+          .findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(
+              startDate,
+              endDate,
+              BalanceStatus.APPROVED,
+              BalanceTypes.INCOMING,
+              BalanceIncomingTypes.TRANSFER);
+
       Tax tax = taxService.getTaxes();
+
+      List<AccountingReportItemDto> responseTransferBalances = transferBalances.stream()
+          .map(balance -> new AccountingReportItemDto(balance, tax))
+          .toList();
 
       List<AccountingReportItemDto> responseBalances = balances.stream()
           .map(balance -> new AccountingReportItemDto(balance, tax))
@@ -186,7 +203,9 @@ public class BalanceService {
           .mainChurchPercentageTotal(responseBalances)
           .mainLeaderPercentageTotal(responseBalances)
           .ministryPercentageTotal(responseBalances)
+          .transferBalances(responseTransferBalances)
           .total(responseBalances)
+          .transferBalancesTotal(responseTransferBalances)
           .build();
     } catch (Exception exception) {
       String errorMessage = "ERROR ON EXTRACT BALANCE" + exception.getMessage();
