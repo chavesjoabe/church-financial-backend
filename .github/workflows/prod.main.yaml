@@ -16,6 +16,16 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     
+    - name: Prepare environment variables
+      run: |
+        export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
+        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
+        export DB_NAME="${{ secrets.DB_NAME }}"
+
+    - name: Unit tests
+      run: |
+        ./mvnw clean test
+          
     - name: Build the application
       run: |
         ./mvnw clean package -DskipTests
