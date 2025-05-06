@@ -185,6 +185,14 @@ public class BalanceService {
               BalanceTypes.INCOMING,
               BalanceIncomingTypes.TRANSFER);
 
+      List<Balance> transferGeolBalances = this.balanceRepository
+          .findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(
+              startDate,
+              endDate,
+              BalanceStatus.APPROVED,
+              BalanceTypes.INCOMING,
+              BalanceIncomingTypes.TRANSFER);
+
       Tax tax = taxService.getTaxes();
 
       List<AccountingReportItemDto> responseTransferBalances = transferBalances.stream()
@@ -192,6 +200,10 @@ public class BalanceService {
           .toList();
 
       List<AccountingReportItemDto> responseBalances = balances.stream()
+          .map(balance -> new AccountingReportItemDto(balance, tax))
+          .toList();
+
+      List<AccountingReportItemDto> responseTransferGeolBalances = transferGeolBalances.stream()
           .map(balance -> new AccountingReportItemDto(balance, tax))
           .toList();
 
@@ -204,8 +216,10 @@ public class BalanceService {
           .mainLeaderPercentageTotal(responseBalances)
           .ministryPercentageTotal(responseBalances)
           .transferBalances(responseTransferBalances)
+          .transferGeolBalances(responseTransferGeolBalances)
           .total(responseBalances)
           .transferBalancesTotal(responseTransferBalances)
+          .transferGeolBalancesTotal(responseTransferGeolBalances)
           .build();
     } catch (Exception exception) {
       String errorMessage = "ERROR ON EXTRACT BALANCE" + exception.getMessage();

@@ -10,8 +10,10 @@ public class AccountingReportItemV2Dto {
   private float ministryPercentageTotal;
   private float mainLeaderPercentageTotal;
   private List<AccountingReportItemDto> transferBalances;
+  private List<AccountingReportItemDto> transferGeolBalances;
   private float total;
   private float transferBalancesTotal;
+  private float transferGeolBalancesTotal;
 
   public AccountingReportItemV2Dto() {
   }
@@ -24,7 +26,9 @@ public class AccountingReportItemV2Dto {
     this.mainChurchPercentageTotal = builder.mainChurchPercentageTotal;
     this.ministryPercentageTotal = builder.ministryPercentageTotal;
     this.transferBalances = builder.transferBalances;
+    this.transferGeolBalances = builder.transferGeolBalances;
     this.transferBalancesTotal = builder.transferBalancesTotal;
+    this.transferGeolBalancesTotal = builder.transferGeolBalancesTotal;
     this.total = builder.total;
   }
 
@@ -42,6 +46,14 @@ public class AccountingReportItemV2Dto {
 
   public void setTransferBalances(List<AccountingReportItemDto> transferBalances) {
     this.transferBalances = transferBalances;
+  }
+
+  public List<AccountingReportItemDto> getTransferGeolBalances() {
+    return transferGeolBalances;
+  }
+
+  public void setTransferGeolBalances(List<AccountingReportItemDto> transferGeolBalances) {
+    this.transferGeolBalances = transferGeolBalances;
   }
 
   public float getChurchFirstLeaderPercentageTotal() {
@@ -100,6 +112,14 @@ public class AccountingReportItemV2Dto {
     this.transferBalancesTotal = transferBalanceTotal;
   }
 
+  public float getTransferGeolBalancesTotal() {
+    return transferGeolBalancesTotal;
+  }
+
+  public void setTransferGeolBalancesTotal(float transferGeolBalanceTotal) {
+    this.transferGeolBalancesTotal = transferGeolBalanceTotal;
+  }
+
   public static class AccountingReportItemBuilder {
     private List<AccountingReportItemDto> balances;
     private float churchFirstLeaderPercentageTotal;
@@ -108,8 +128,10 @@ public class AccountingReportItemV2Dto {
     private float ministryPercentageTotal;
     private float mainLeaderPercentageTotal;
     private List<AccountingReportItemDto> transferBalances;
+    private List<AccountingReportItemDto> transferGeolBalances;
     private float total;
     private float transferBalancesTotal;
+    private float transferGeolBalancesTotal;
 
     public AccountingReportItemBuilder() {
     }
@@ -121,6 +143,11 @@ public class AccountingReportItemV2Dto {
 
     public AccountingReportItemBuilder transferBalances(List<AccountingReportItemDto> transferBalances) {
       this.transferBalances = transferBalances;
+      return this;
+    }
+
+    public AccountingReportItemBuilder transferGeolBalances(List<AccountingReportItemDto> transferGeolBalances) {
+      this.transferGeolBalances = transferGeolBalances;
       return this;
     }
 
@@ -197,6 +224,17 @@ public class AccountingReportItemV2Dto {
           .reduce(0f, Float::sum);
 
       this.transferBalancesTotal = result;
+
+      return this;
+    }
+
+    public AccountingReportItemBuilder transferGeolBalancesTotal(List<AccountingReportItemDto> balances) {
+      float result = this.transferGeolBalances
+          .stream()
+          .map(AccountingReportItemDto::getValue)
+          .reduce(0f, Float::sum);
+
+      this.transferGeolBalancesTotal = result;
 
       return this;
     }
