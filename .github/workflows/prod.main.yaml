@@ -16,6 +16,12 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     
+    - name: Create .env file
+      run: |
+        echo "APPLICATION_NAME=${{ secrets.APPLICATION_NAME }}" >> .env
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
     - name: Build the application
       run: |
         ./mvnw clean package
