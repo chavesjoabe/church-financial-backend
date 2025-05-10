@@ -38,7 +38,6 @@ jobs:
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
-        SERVICE_NAME: church-financial
         JAR_NAME: church-financial.jar
         APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -52,7 +51,7 @@ jobs:
 
         echo "Updating systemd unit file and restarting service..."
         ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
-          sudo bash -c 'cat > /etc/systemd/system/$SERVICE_NAME.service' << EOL
+          sudo bash -c "cat > /etc/systemd/system/church-financial.service" << EOL
 [Unit]
 Description=My Spring Boot Church Financial Application
 After=network.target
