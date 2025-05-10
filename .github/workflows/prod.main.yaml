@@ -53,12 +53,12 @@ jobs:
 
           git pull origin main
 
-          ./mvnw clean package -DskipTest
+          ./mvnw clean package -DskipTests
 
           cp target/*.jar ~/application/church-financial.jar
 
           sudo systemctl daemon-reload
-          sudo systemctl restart myapp
+          sudo systemctl restart church-financial
 
           echo "Deployment completed and service restarted!"
         EOF
