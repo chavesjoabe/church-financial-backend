@@ -32,24 +32,22 @@ jobs:
         name: spring-app
         path: target/*.jar
         
-    - name: Deploy to VPS and update systemd
+    - name: Deploy to VPS
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
         JAR_NAME: church-financial.jar
-        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        SERVICE_NAME: church-financial
       run: |
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
         echo "Uploading JAR..."
         scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/$JAR_NAME
-        echo "Updating systemd unit file and restarting service..."
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "sudo bash -c 'cat > /etc/systemd/system/church-financial.service << EOL
+    
+    - name: Create systemd service file
+      run: |
+        cat > church-financial.service << 'EOF'
 [Unit]
 Description=My Spring Boot Church Financial Application
 After=network.target
@@ -58,9 +56,9 @@ After=network.target
 User=root
 WorkingDirectory=$APP_DIR
 ExecStart=/usr/bin/java -jar $APP_DIR/$JAR_NAME
-Environment=\"APPLICATION_NAME=$APPLICATION_NAME\"
-Environment=\"DATABASE_URL=$DATABASE_URL\"
-Environment=\"DB_NAME=$DB_NAME\"
+Environment="APPLICATION_NAME=$APPLICATION_NAME"
+Environment="DATABASE_URL=$DATABASE_URL"
+Environment="DB_NAME=$DB_NAME"
 SuccessExitStatus=143
 TimeoutStopSec=10
 Restart=on-failure
@@ -68,8 +66,18 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-EOL
-sudo systemctl daemon-reload
-sudo systemctl restart $SERVICE_NAME
-sudo systemctl enable $SERVICE_NAME'"
+EOF
 
+    - name: Upload systemd service file and restart service
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
+        APP_DIR: ${{ secrets.APP_DIR }}
+        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        SERVICE_NAME: church-financial
+      run: |
+        scp -o StrictHostKeyChecking=no -i private_key.pem church-financial.service $EC2_USER@$EC2_HOST:/tmp/church-financial.service
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "sudo mv /tmp/church-financial.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl restart $SERVICE_NAME && sudo systemctl enable $SERVICE_NAME"
