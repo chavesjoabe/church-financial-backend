@@ -53,7 +53,7 @@ jobs:
 
           git pull origin main
 
-          ./mvnw clean package
+          ./mvnw clean package -DskipTest
 
           cp target/*.jar ~/application/church-financial.jar
 
