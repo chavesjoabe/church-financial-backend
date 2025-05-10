@@ -1,3 +1,35 @@
+name: Deploy application
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    
+    - name: Create .env file
+      run: |
+        echo "APPLICATION_NAME=${{ secrets.APPLICATION_NAME }}" >> .env
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+
+    - name: Build the application
+      run: |
+        ./mvnw clean package -DskipTests
+
+    - name: Unit tests
+      run: |
+        ./mvnw test
+
     - name: Deploy to VPS via SSH
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -26,8 +58,7 @@
           cp target/*.jar ~/application/church-financial.jar
 
           sudo systemctl daemon-reload
-          sudo systemctl restart church-financial 
+          sudo systemctl restart myapp
 
           echo "Deployment completed and service restarted!"
         EOF
-
