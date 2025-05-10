@@ -77,3 +77,4 @@ EOL
           sudo systemctl restart $SERVICE_NAME
           sudo systemctl enable $SERVICE_NAME
 EOF
+
