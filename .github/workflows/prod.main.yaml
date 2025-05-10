@@ -31,87 +31,49 @@ jobs:
       with:
         name: spring-app
         path: target/*.jar
-    
-    - name: Deploy to EC2
+
+    - name: Deploy to VPS and update systemd
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
+        SERVICE_NAME: church-financial
+        JAR_NAME: church-financial.jar
+        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        DB_NAME: ${{ secrets.DB_NAME }}
       run: |
-        # Create SSH key file
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
-        
-        # Test SSH connection
-        if ! ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'SSH connection successful'"; then
-          echo "Failed to establish SSH connection"
-          exit 1
-        fi
-        
-        # Create and upload the startup script
-        cat << 'EOF' > start-application.sh
-        #!/bin/bash
 
-        echo "Checking for running application..."
-        
-        # Find and kill the existing process
-        EXISTING_PROCESS=$(ps aux | grep app.jar | grep -v grep)
-        if [ ! -z "$EXISTING_PROCESS" ]; then
-          echo "Found running application:"
-          echo "$EXISTING_PROCESS"
-          
-          # Extract PID from ps output (second column)
-          OLD_PID=$(echo "$EXISTING_PROCESS" | awk '{print $2}')
-          echo "Stopping process with PID: $OLD_PID"
-          
-          # Try graceful shutdown first
-          kill -15 $OLD_PID
-          sleep 5
-          
-          # Check if process is still running
-          if ps -p $OLD_PID > /dev/null; then
-            echo "Process still running, force killing it..."
-            kill -9 $OLD_PID
-            sleep 2
-          fi
-        else
-          echo "No running application found"
-        fi
+        echo "Uploading JAR..."
+        scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/$JAR_NAME
 
-        # Export environment variables
-        export APPLICATION_NAME="${{ secrets.APPLICATION_NAME }}"
-        export DATABASE_URL="${{ secrets.DATABASE_URL }}"
-        export DB_NAME="${{ secrets.DB_NAME }}"
+        echo "Updating systemd unit file and restarting service..."
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << EOF
+          sudo bash -c 'cat > /etc/systemd/system/$SERVICE_NAME.service' << EOL
+[Unit]
+Description=My Spring Boot Church Financial Application
+After=network.target
 
-        echo "Starting new application instance..."
-        cd "${APP_DIR}"
-        nohup java -jar app.jar > app.log 2>&1 &
+[Service]
+User=root
+WorkingDirectory=$APP_DIR
+ExecStart=/usr/bin/java -jar $APP_DIR/$JAR_NAME
+Environment="APPLICATION_NAME=$APPLICATION_NAME"
+Environment="DATABASE_URL=$DATABASE_URL"
+Environment="DB_NAME=$DB_NAME"
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
 
-        # Save the PID and verify the process started
-        NEW_PID=$!
-        echo $NEW_PID > app.pid
-        echo "Application started with PID: $NEW_PID"
+[Install]
+WantedBy=multi-user.target
+EOL
 
-        # Verify the process is running
-        sleep 5
-        if ps aux | grep -v grep | grep app.jar > /dev/null; then
-          echo "Application successfully started and running"
-          ps aux | grep app.jar | grep -v grep
-        else
-          echo "Failed to start application"
-          exit 1
-        fi
-        EOF
-        
-        # Ensure the target directory exists on EC2
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "mkdir -p $APP_DIR"
-        
-        # Upload the JAR file
-        echo "Uploading JAR file..."
-        scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/app.jar
-        
-        # Upload and execute the startup script
-        echo "Uploading and executing startup script..."
-        scp -o StrictHostKeyChecking=no -i private_key.pem start-application.sh $EC2_USER@$EC2_HOST:$APP_DIR/
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "chmod +x $APP_DIR/start-application.sh && cd $APP_DIR && ./start-application.sh"
+          sudo systemctl daemon-reload
+          sudo systemctl restart $SERVICE_NAME
+          sudo systemctl enable $SERVICE_NAME
+EOF

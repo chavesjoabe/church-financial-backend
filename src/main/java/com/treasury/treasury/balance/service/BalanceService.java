@@ -14,6 +14,7 @@ import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
+import com.treasury.treasury.commons.loggerService.LoggerService;
 import com.treasury.treasury.tax.schema.Tax;
 import com.treasury.treasury.tax.service.TaxService;
 import com.treasury.treasury.user.constants.UserRoles;
@@ -23,12 +24,15 @@ public class BalanceService {
 
   private final BalanceRepository balanceRepository;
   private final TaxService taxService;
+  private final LoggerService logger;
 
   public BalanceService(
       BalanceRepository balanceRepository,
-      TaxService taxService) {
+      TaxService taxService,
+      LoggerService logger) {
     this.balanceRepository = balanceRepository;
     this.taxService = taxService;
+    this.logger = logger;
   }
 
   public Balance create(
@@ -44,6 +48,10 @@ public class BalanceService {
         balanceDto.getDescription(),
         balanceDto.getFreeDescription(),
         balanceDto.getIncomingType());
+
+    logger.info(
+        BalanceService.class,
+        "new balance with id - " + balance.getId() + " created with success");
 
     return this.balanceRepository.save(balance);
   }

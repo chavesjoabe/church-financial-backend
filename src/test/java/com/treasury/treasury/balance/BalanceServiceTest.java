@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.treasury.treasury.balance.constants.BalanceDescriptions;
@@ -22,6 +23,8 @@ import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
+import com.treasury.treasury.commons.loggerService.LoggerService;
+import com.treasury.treasury.tax.service.TaxService;
 import com.treasury.treasury.user.constants.UserRoles;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,6 +32,12 @@ public class BalanceServiceTest {
 
   @Mock
   private BalanceRepository balanceRepository;
+
+  @Mock
+  private TaxService taxService;
+
+  @Mock
+  private LoggerService logger;
 
   @InjectMocks
   private BalanceService balanceService;
@@ -44,7 +53,8 @@ public class BalanceServiceTest {
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
-    when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
+    when(balanceRepository.save(any(Balance.class)))
+        .thenReturn(sampleBalance);
 
     BalanceDto balanceDto = new BalanceDto(
         BalanceTypes.INCOMING,
@@ -58,6 +68,11 @@ public class BalanceServiceTest {
     Balance result = balanceService.create(balanceDto, "", "");
 
     assertEquals(result.getValue(), 333);
+    Mockito.verify(logger, Mockito.times(1))
+        .info(any(), any());
+
+    Mockito.verify(balanceRepository, Mockito.times(1))
+        .save(any());
   }
 
   public void ShouldCreateBalanceAndGetResponsibleFromParameter() {
@@ -70,7 +85,8 @@ public class BalanceServiceTest {
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
-    when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
+    when(balanceRepository.save(any(Balance.class)))
+        .thenReturn(sampleBalance);
 
     BalanceDto balanceDto = new BalanceDto(
         BalanceTypes.INCOMING,
@@ -136,7 +152,8 @@ public class BalanceServiceTest {
     Instant startDate = Instant.now();
     Instant endDate = Instant.now();
 
-    when(balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(startDate, endDate, BalanceStatus.APPROVED)).thenReturn(mockBalances);
+    when(balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(startDate, endDate,
+        BalanceStatus.APPROVED)).thenReturn(mockBalances);
 
     List<Balance> result = balanceService.findAllBalancesByDate(startDate, endDate);
 
@@ -203,10 +220,15 @@ public class BalanceServiceTest {
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
-    when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
-    when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
+    when(balanceRepository.findById("123"))
+        .thenReturn(Optional.of(sampleBalance));
 
-    Balance response = balanceService.rejectBalance("123", "TESTE 2", UserRoles.ADMIN.toString());
+    when(balanceRepository.save(any(Balance.class)))
+        .thenReturn(sampleBalance);
+
+    Balance response = balanceService
+        .rejectBalance("123", "TESTE 2", UserRoles.ADMIN.toString());
+
     assertEquals(response.getStatus(), BalanceStatus.REJECTED);
   }
 
@@ -221,8 +243,10 @@ public class BalanceServiceTest {
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
-    when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
-    when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
+    when(balanceRepository.findById("123"))
+        .thenReturn(Optional.of(sampleBalance));
+    when(balanceRepository.save(any(Balance.class)))
+        .thenReturn(sampleBalance);
 
     Balance response = balanceService.removeBalance("123", "TESTE 2", UserRoles.ADMIN.toString());
     assertEquals(response.getStatus(), BalanceStatus.REMOVED);
