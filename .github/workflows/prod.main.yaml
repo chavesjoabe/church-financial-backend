@@ -1,83 +1,33 @@
-name: Deploy to AWS EC2
-on:
-  push:
-    branches:
-      - main
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    
-    - name: Set up JDK
-      uses: actions/setup-java@v3
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-    
-    - name: Create .env file
-      run: |
-        echo "APPLICATION_NAME=${{ secrets.APPLICATION_NAME }}" >> .env
-        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-        
-    - name: Build the application
-      run: |
-        ./mvnw clean package
-        
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: spring-app
-        path: target/*.jar
-        
-    - name: Deploy to VPS
+    - name: Deploy to VPS via SSH
       env:
         EC2_HOST: ${{ secrets.EC2_HOST }}
         EC2_USER: ${{ secrets.EC2_USER }}
         EC2_KEY: ${{ secrets.EC2_KEY }}
         APP_DIR: ${{ secrets.APP_DIR }}
-        JAR_NAME: church-financial.jar
       run: |
         echo "$EC2_KEY" > private_key.pem
         chmod 600 private_key.pem
-        echo "Uploading JAR..."
-        scp -o StrictHostKeyChecking=no -i private_key.pem target/*.jar $EC2_USER@$EC2_HOST:$APP_DIR/$JAR_NAME
-    
-    - name: Create systemd service file
-      run: |
-        cat > church-financial.service << 'EOF'
-[Unit]
-Description=My Spring Boot Church Financial Application
-After=network.target
 
-[Service]
-User=root
-WorkingDirectory=$APP_DIR
-ExecStart=/usr/bin/java -jar $APP_DIR/$JAR_NAME
-Environment="APPLICATION_NAME=$APPLICATION_NAME"
-Environment="DATABASE_URL=$DATABASE_URL"
-Environment="DB_NAME=$DB_NAME"
-SuccessExitStatus=143
-TimeoutStopSec=10
-Restart=on-failure
-RestartSec=5
+        if ! ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "echo 'SSH connection successful'"; then
+          echo "Failed to establish SSH connection"
+          exit 1
+        fi
 
-[Install]
-WantedBy=multi-user.target
-EOF
+        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          cd ~/application || {
+            echo "Directory ~/application not found. Exiting.";
+            exit 1;
+          }
 
-    - name: Upload systemd service file and restart service
-      env:
-        EC2_HOST: ${{ secrets.EC2_HOST }}
-        EC2_USER: ${{ secrets.EC2_USER }}
-        EC2_KEY: ${{ secrets.EC2_KEY }}
-        APP_DIR: ${{ secrets.APP_DIR }}
-        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        SERVICE_NAME: church-financial
-      run: |
-        scp -o StrictHostKeyChecking=no -i private_key.pem church-financial.service $EC2_USER@$EC2_HOST:/tmp/church-financial.service
-        ssh -o StrictHostKeyChecking=no -i private_key.pem $EC2_USER@$EC2_HOST "sudo mv /tmp/church-financial.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl restart $SERVICE_NAME && sudo systemctl enable $SERVICE_NAME"
+          git pull origin main
+
+          ./mvnw clean package
+
+          cp target/*.jar ~/application/church-financial.jar
+
+          sudo systemctl daemon-reload
+          sudo systemctl restart church-financial 
+
+          echo "Deployment completed and service restarted!"
+        EOF
+
