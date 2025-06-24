@@ -2,34 +2,29 @@ package com.treasury.treasury.balance.dto;
 
 import java.util.List;
 
+import com.treasury.treasury.balance.schema.Balance;
+
 public class AccountingReportItemV2Dto {
   private List<AccountingReportItemDto> balances;
-  private float churchFirstLeaderPercentageTotal;
-  private float churchSecondLeaderPercentageTotal;
-  private float mainChurchPercentageTotal;
-  private float ministryPercentageTotal;
-  private float mainLeaderPercentageTotal;
   private List<AccountingReportItemDto> transferBalances;
   private List<AccountingReportItemDto> transferGeolBalances;
-  private float total;
-  private float transferBalancesTotal;
-  private float transferGeolBalancesTotal;
+  private List<Balance> nonOficialBalances;
+  private TotalDto transferGeolBalancesTotal;
+  private TotalDto balancesTotal;
+  private TotalDto transferBalancesTotal;
 
   public AccountingReportItemV2Dto() {
   }
 
   public AccountingReportItemV2Dto(AccountingReportItemBuilder builder) {
     this.balances = builder.balances;
-    this.churchFirstLeaderPercentageTotal = builder.churchFirstLeaderPercentageTotal;
-    this.churchSecondLeaderPercentageTotal = builder.churchSecondLeaderPercentageTotal;
-    this.mainLeaderPercentageTotal = builder.mainLeaderPercentageTotal;
-    this.mainChurchPercentageTotal = builder.mainChurchPercentageTotal;
-    this.ministryPercentageTotal = builder.ministryPercentageTotal;
     this.transferBalances = builder.transferBalances;
     this.transferGeolBalances = builder.transferGeolBalances;
+    this.nonOficialBalances = builder.nonOficialBalances;
     this.transferBalancesTotal = builder.transferBalancesTotal;
     this.transferGeolBalancesTotal = builder.transferGeolBalancesTotal;
-    this.total = builder.total;
+    this.balancesTotal = builder.balancesTotal;
+    this.transferBalancesTotal = builder.transferBalancesTotal;
   }
 
   public List<AccountingReportItemDto> getBalances() {
@@ -56,82 +51,46 @@ public class AccountingReportItemV2Dto {
     this.transferGeolBalances = transferGeolBalances;
   }
 
-  public float getChurchFirstLeaderPercentageTotal() {
-    return churchFirstLeaderPercentageTotal;
+  public void setNonOficialBalances(List<Balance> nonOficialBalances) {
+    this.nonOficialBalances = nonOficialBalances;
   }
 
-  public void setChurchFirstLeaderPercentageTotal(Float churchFirstLeaderPercentageTotal) {
-    this.churchFirstLeaderPercentageTotal = churchFirstLeaderPercentageTotal;
+  public List<Balance> getNonOficialBalances() {
+    return nonOficialBalances;
   }
 
-  public float getChurchSecondLeaderPercentageTotal() {
-    return churchSecondLeaderPercentageTotal;
-  }
-
-  public void setChurchSecondLeaderPercentageTotal(Float churchSecondLeaderPercentageTotal) {
-    this.churchSecondLeaderPercentageTotal = churchSecondLeaderPercentageTotal;
-  }
-
-  public float getMainChurchPercentageTotal() {
-    return mainChurchPercentageTotal;
-  }
-
-  public void setMainChurchPercentageTotal(Float mainChurchPercentageTotal) {
-    this.mainChurchPercentageTotal = mainChurchPercentageTotal;
-  }
-
-  public float getMinistryPercentageTotal() {
-    return ministryPercentageTotal;
-  }
-
-  public void setMinistryPercentageTotal(Float ministryPercentageTotal) {
-    this.ministryPercentageTotal = ministryPercentageTotal;
-  }
-
-  public float getMainLeaderPercentageTotal() {
-    return mainLeaderPercentageTotal;
-  }
-
-  public void setMainLeaderPercentageTotal(Float mainLeaderPercentageTotal) {
-    this.mainLeaderPercentageTotal = mainLeaderPercentageTotal;
-  }
-
-  public float getTotal() {
-    return total;
-  }
-
-  public void setTotal(float total) {
-    this.total = total;
-  }
-
-  public float getTransferBalancesTotal() {
+  public TotalDto getTransferBalancesTotal() {
     return transferBalancesTotal;
   }
 
-  public void setTransferBalancesTotal(float transferBalanceTotal) {
+  public void setTransferBalancesTotal(TotalDto transferBalanceTotal) {
     this.transferBalancesTotal = transferBalanceTotal;
   }
 
-  public float getTransferGeolBalancesTotal() {
+  public TotalDto getTransferGeolBalancesTotal() {
     return transferGeolBalancesTotal;
   }
 
-  public void setTransferGeolBalancesTotal(float transferGeolBalanceTotal) {
+  public void setTransferGeolBalancesTotal(TotalDto transferGeolBalanceTotal) {
     this.transferGeolBalancesTotal = transferGeolBalanceTotal;
+  }
+
+  public TotalDto getBalancesTotal() {
+    return balancesTotal;
+  }
+
+  public void setBalancesTotal(TotalDto balancesTotal) {
+    this.balancesTotal = balancesTotal;
   }
 
   public static class AccountingReportItemBuilder {
     private List<AccountingReportItemDto> balances;
-    private float churchFirstLeaderPercentageTotal;
-    private float churchSecondLeaderPercentageTotal;
-    private float mainChurchPercentageTotal;
-    private float ministryPercentageTotal;
-    private float mainLeaderPercentageTotal;
     private List<AccountingReportItemDto> transferBalances;
     private List<AccountingReportItemDto> transferGeolBalances;
-    private float total;
-    private float transferBalancesTotal;
-    private float transferGeolBalancesTotal;
+    private List<Balance> nonOficialBalances;
+    private TotalDto transferBalancesTotal;
+    private TotalDto transferGeolBalancesTotal;
+    private TotalDto balancesTotal;
 
     public AccountingReportItemBuilder() {
     }
@@ -151,92 +110,67 @@ public class AccountingReportItemV2Dto {
       return this;
     }
 
-    public AccountingReportItemBuilder churchFirstLeaderPercentage(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getChurchFirstLeaderPercentage)
-          .reduce(0f, Float::sum);
+    public AccountingReportItemBuilder nonOficialBalances(List<Balance> nonOficialBalances) {
+      this.nonOficialBalances = nonOficialBalances;
+      return this;
+    }
 
-      this.churchFirstLeaderPercentageTotal = result;
+    public AccountingReportItemBuilder transferGeolBalancesTotal(List<AccountingReportItemDto> balances) {
+      this.transferGeolBalancesTotal = generateTotal(balances);
 
       return this;
     }
 
-    public AccountingReportItemBuilder churchSecondLeaderPercentageTotal(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getChurchSecondLeaderPercentage)
-          .reduce(0f, Float::sum);
-
-      this.churchSecondLeaderPercentageTotal = result;
-
-      return this;
-    }
-
-    public AccountingReportItemBuilder mainChurchPercentageTotal(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getMainChurchPercentage)
-          .reduce(0f, Float::sum);
-
-      this.mainChurchPercentageTotal = result;
-
-      return this;
-    }
-
-    public AccountingReportItemBuilder mainLeaderPercentageTotal(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getMainLeaderPercentage)
-          .reduce(0f, Float::sum);
-
-      this.mainLeaderPercentageTotal = result;
-
-      return this;
-    }
-
-    public AccountingReportItemBuilder ministryPercentageTotal(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getMinistryPercentage)
-          .reduce(0f, Float::sum);
-
-      this.ministryPercentageTotal = result;
-
-      return this;
-    }
-
-    public AccountingReportItemBuilder total(List<AccountingReportItemDto> balances) {
-      float result = this.balances
-          .stream()
-          .map(AccountingReportItemDto::getValue)
-          .reduce(0f, Float::sum);
-
-      this.total = result;
+    public AccountingReportItemBuilder balancesTotal(List<AccountingReportItemDto> balances) {
+      this.balancesTotal = generateTotal(balances);
 
       return this;
     }
 
     public AccountingReportItemBuilder transferBalancesTotal(List<AccountingReportItemDto> balances) {
-      float result = this.transferBalances
-          .stream()
-          .map(AccountingReportItemDto::getValue)
-          .reduce(0f, Float::sum);
-
-      this.transferBalancesTotal = result;
+      this.transferBalancesTotal = generateTotal(balances);
 
       return this;
     }
 
-    public AccountingReportItemBuilder transferGeolBalancesTotal(List<AccountingReportItemDto> balances) {
-      float result = this.transferGeolBalances
+    private TotalDto generateTotal(List<AccountingReportItemDto> balances) {
+      float churchFirstLeaderPercentageTotal = balances
+          .stream()
+          .map(AccountingReportItemDto::getChurchFirstLeaderPercentage)
+          .reduce(0f, Float::sum);
+
+      float churchSecondLeaderPercentageTotal = balances
+          .stream()
+          .map(AccountingReportItemDto::getChurchSecondLeaderPercentage)
+          .reduce(0f, Float::sum);
+
+      float mainChurchPercentageTotal = balances
+          .stream()
+          .map(AccountingReportItemDto::getMainChurchPercentage)
+          .reduce(0f, Float::sum);
+
+      float mainLeaderPercentageTotal = balances
+          .stream()
+          .map(AccountingReportItemDto::getMainLeaderPercentage)
+          .reduce(0f, Float::sum);
+
+      float ministryPercentageTotal = balances
+          .stream()
+          .map(AccountingReportItemDto::getMinistryPercentage)
+          .reduce(0f, Float::sum);
+
+      float total = balances
           .stream()
           .map(AccountingReportItemDto::getValue)
           .reduce(0f, Float::sum);
 
-      this.transferGeolBalancesTotal = result;
-
-      return this;
+      return this.balancesTotal = new TotalDto(
+          churchFirstLeaderPercentageTotal,
+          churchSecondLeaderPercentageTotal,
+          mainChurchPercentageTotal,
+          mainLeaderPercentageTotal,
+          ministryPercentageTotal,
+          total);
     }
 
     public AccountingReportItemV2Dto build() {
@@ -247,5 +181,4 @@ public class AccountingReportItemV2Dto {
   public static AccountingReportItemBuilder builder() {
     return new AccountingReportItemBuilder();
   }
-
 }

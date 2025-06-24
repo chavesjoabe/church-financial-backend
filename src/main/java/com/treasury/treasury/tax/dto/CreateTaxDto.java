@@ -6,6 +6,8 @@ public class CreateTaxDto {
   private Double mainChurchPercentage;
   private Double ministryPercentage;
   private Double mainLeaderPercentage;
+  private Double transferMainLeaderPercentage;
+  private Double transferMainChurchPercentage;
 
   public CreateTaxDto() {
   }
@@ -15,12 +17,16 @@ public class CreateTaxDto {
       Double secondLeaderPercentage,
       Double mainChurchPercentage,
       Double ministryPercentage,
-      Double mainLeaderPercentage) {
+      Double mainLeaderPercentage,
+      Double transferMainLeaderPercentage,
+      Double transferMainChurchPercentage) {
     this.firstLeaderPercentage = firstLeaderPercentage;
     this.secondLeaderPercentage = secondLeaderPercentage;
     this.mainChurchPercentage = mainChurchPercentage;
     this.ministryPercentage = ministryPercentage;
     this.mainLeaderPercentage = mainLeaderPercentage;
+    this.transferMainLeaderPercentage = transferMainLeaderPercentage;
+    this.transferMainChurchPercentage = transferMainChurchPercentage;
   }
 
   public Double getFirstLeaderPercentage() {
@@ -28,7 +34,7 @@ public class CreateTaxDto {
   }
 
   public void setFirstLeaderPercentage(Double firstLeaderPercentage) {
-    this.firstLeaderPercentage= firstLeaderPercentage;
+    this.firstLeaderPercentage = firstLeaderPercentage;
   }
 
   public Double getSecondLeaderPercentage() {
@@ -63,4 +69,19 @@ public class CreateTaxDto {
     this.mainLeaderPercentage = mainLeaderPercentage;
   }
 
+  public Double getTransferMainLeaderPercentage() {
+    return transferMainLeaderPercentage;
+  }
+
+  public void setTransferMainLeaderPercentage(Double transferMainLeaderPercentage) {
+    this.transferMainLeaderPercentage = transferMainLeaderPercentage;
+  }
+
+  public Double getTransferMainChurchPercentage() {
+    return transferMainChurchPercentage;
+  }
+
+  public void setTransferMainChurchPercentage(Double transferMainChurchPercentage) {
+    this.transferMainChurchPercentage = transferMainChurchPercentage;
+  }
 }

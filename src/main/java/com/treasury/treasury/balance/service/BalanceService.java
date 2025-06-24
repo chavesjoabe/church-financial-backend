@@ -199,7 +199,15 @@ public class BalanceService {
               endDate,
               BalanceStatus.APPROVED,
               BalanceTypes.INCOMING,
-              BalanceIncomingTypes.TRANSFER);
+              BalanceIncomingTypes.TRANSFER_GEOL);
+
+      List<Balance> nonOficialBalances = this.balanceRepository
+          .findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(
+              startDate,
+              endDate,
+              BalanceStatus.APPROVED,
+              BalanceTypes.INCOMING,
+              BalanceIncomingTypes.NON_OFICIAL);
 
       Tax tax = taxService.getTaxes();
 
@@ -218,16 +226,12 @@ public class BalanceService {
       return AccountingReportItemV2Dto
           .builder()
           .balances(responseBalances)
-          .churchFirstLeaderPercentage(responseBalances)
-          .churchSecondLeaderPercentageTotal(responseBalances)
-          .mainChurchPercentageTotal(responseBalances)
-          .mainLeaderPercentageTotal(responseBalances)
-          .ministryPercentageTotal(responseBalances)
           .transferBalances(responseTransferBalances)
           .transferGeolBalances(responseTransferGeolBalances)
-          .total(responseBalances)
+          .nonOficialBalances(nonOficialBalances)
           .transferBalancesTotal(responseTransferBalances)
           .transferGeolBalancesTotal(responseTransferGeolBalances)
+          .balancesTotal(responseBalances)
           .build();
     } catch (Exception exception) {
       String errorMessage = "ERROR ON EXTRACT BALANCE" + exception.getMessage();

@@ -36,7 +36,9 @@ public class TaxService {
             createTaxDto.getSecondLeaderPercentage(),
             createTaxDto.getMainChurchPercentage(),
             createTaxDto.getMinistryPercentage(),
-            createTaxDto.getMainLeaderPercentage());
+            createTaxDto.getMainLeaderPercentage(),
+            createTaxDto.getTransferMainLeaderPercentage(),
+            createTaxDto.getTransferMainChurchPercentage());
         return this.taxRepository.save(tax);
       }
       Tax existingTax = existingTaxes.get(0);
@@ -46,6 +48,8 @@ public class TaxService {
       existingTax.setMainChurchPercentage(createTaxDto.getMainChurchPercentage());
       existingTax.setMainLeaderPercentage(createTaxDto.getMainLeaderPercentage());
       existingTax.setMinistryPercentage(createTaxDto.getMinistryPercentage());
+      existingTax.setTransferMainLeaderPercentage(createTaxDto.getTransferMainLeaderPercentage());
+      existingTax.setTransferMainChurchPercentage(createTaxDto.getTransferMainChurchPercentage());
 
       return this.taxRepository.save(existingTax);
     } catch (Exception e) {
