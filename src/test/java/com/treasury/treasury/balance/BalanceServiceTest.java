@@ -48,6 +48,7 @@ public class BalanceServiceTest {
         BalanceTypes.INCOMING,
         (float) 333,
         "TESTE",
+        "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
         "Free description",
@@ -65,7 +66,7 @@ public class BalanceServiceTest {
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
-    Balance result = balanceService.create(balanceDto, "", "");
+    Balance result = balanceService.create(balanceDto, "", "", "");
 
     assertEquals(result.getValue(), 333);
     Mockito.verify(logger, Mockito.times(1))
@@ -79,6 +80,7 @@ public class BalanceServiceTest {
     Balance sampleBalance = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
@@ -99,7 +101,7 @@ public class BalanceServiceTest {
 
     String loggedDocument = "123123";
 
-    Balance result = balanceService.create(balanceDto, loggedDocument, "");
+    Balance result = balanceService.create(balanceDto, loggedDocument, "", "TESTE");
 
     assertEquals(result.getValue(), 333);
     assertEquals(result.getResponsible(), loggedDocument);
@@ -110,6 +112,7 @@ public class BalanceServiceTest {
     Balance balance = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
@@ -133,6 +136,7 @@ public class BalanceServiceTest {
         BalanceTypes.INCOMING,
         (float) 333,
         "TESTE",
+        "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
         "Free description",
@@ -141,6 +145,7 @@ public class BalanceServiceTest {
     Balance balance2 = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
@@ -168,6 +173,7 @@ public class BalanceServiceTest {
         BalanceTypes.INCOMING,
         (float) 333,
         "TESTE",
+        "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
         "Free description",
@@ -176,6 +182,7 @@ public class BalanceServiceTest {
     Balance balance2 = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
@@ -197,6 +204,7 @@ public class BalanceServiceTest {
         BalanceTypes.INCOMING,
         (float) 333,
         "TESTE",
+        "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
         "Free description",
@@ -214,6 +222,7 @@ public class BalanceServiceTest {
     Balance sampleBalance = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
@@ -237,6 +246,7 @@ public class BalanceServiceTest {
     Balance sampleBalance = new Balance(
         BalanceTypes.INCOMING,
         (float) 333,
+        "TESTE",
         "TESTE",
         Instant.now(),
         BalanceDescriptions.PIX,
