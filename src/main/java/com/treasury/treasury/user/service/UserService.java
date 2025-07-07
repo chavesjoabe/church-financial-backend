@@ -65,7 +65,7 @@ public class UserService {
     try {
       User user = getUserByDocument(loginDto.getDocument());
       if (user != null && loginDto.getPassword().equals(user.getPassword()) && user.getIsActive()) {
-        return this.jwtUtil.generateToken(user.getDocument(), user.getRole());
+        return this.jwtUtil.generateToken(user.getDocument(), user.getRole(), user.getName());
       }
 
       return null;

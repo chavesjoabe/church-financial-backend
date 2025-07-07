@@ -42,9 +42,10 @@ public class BalanceController {
   public ResponseEntity<Balance> create(
       @RequestBody BalanceDto balanceDto,
       @RequestAttribute("loggedUserDocument") String loggedUserDocument,
-      @RequestAttribute("loggedUserRole") String loggedUserRole) {
+      @RequestAttribute("loggedUserRole") String loggedUserRole,
+      @RequestAttribute("loggedUserName") String loggedUserName) {
 
-    Balance balance = this.balanceService.create(balanceDto, loggedUserDocument, loggedUserRole);
+    Balance balance = this.balanceService.create(balanceDto, loggedUserDocument, loggedUserRole, loggedUserName);
     return new ResponseEntity<Balance>(balance, HttpStatus.CREATED);
   }
 

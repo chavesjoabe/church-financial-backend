@@ -30,6 +30,7 @@ public class BalanceService {
       BalanceRepository balanceRepository,
       TaxService taxService,
       LoggerService logger) {
+
     this.balanceRepository = balanceRepository;
     this.taxService = taxService;
     this.logger = logger;
@@ -38,12 +39,14 @@ public class BalanceService {
   public Balance create(
       BalanceDto balanceDto,
       String loggedUserDocument,
-      String loggedUserRole) {
+      String loggedUserRole,
+      String loggedUserName) {
 
     Balance balance = new Balance(
         balanceDto.getType(),
         balanceDto.getValue(),
         loggedUserDocument,
+        loggedUserName,
         balanceDto.getBalanceDate(),
         balanceDto.getDescription(),
         balanceDto.getFreeDescription(),

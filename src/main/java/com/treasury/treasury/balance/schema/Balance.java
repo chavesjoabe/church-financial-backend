@@ -19,6 +19,7 @@ public class Balance {
   private BalanceTypes type;
   private Float value;
   private String responsible;
+  private String responsibleName;
   private Instant createdAt;
   private Instant updatedAt;
   private BalanceStatus status;
@@ -35,6 +36,7 @@ public class Balance {
       BalanceTypes type,
       Float value,
       String responsible,
+      String responsibleName,
       Instant balanceDate,
       BalanceDescriptions description,
       String freeDescription,
@@ -43,6 +45,7 @@ public class Balance {
     this.type = type;
     this.value = value;
     this.responsible = responsible;
+    this.responsibleName = responsibleName;
     this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
     this.status = BalanceStatus.PENDING;
@@ -78,9 +81,18 @@ public class Balance {
     return responsible;
   }
 
+  public String getResponsibleName() {
+    return responsibleName;
+  }
+
   public void setResponsible(String responsible) {
     this.updatedAt = Instant.now();
     this.responsible = responsible;
+  }
+
+  public void setResponsibleName(String responsibleName) {
+    this.updatedAt = Instant.now();
+    this.responsibleName = responsibleName;
   }
 
   public Instant getCreatedAt() {

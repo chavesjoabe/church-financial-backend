@@ -26,10 +26,11 @@ public class JwtUtil {
     return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
   }
 
-  public LoginResponse generateToken(String document, UserRoles role) {
+  public LoginResponse generateToken(String document, UserRoles role, String name) {
     String jwt = Jwts.builder()
         .setSubject(document)
         .claim("role", role)
+        .claim("name", name)
         .setIssuedAt(new Date())
         .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
         .signWith(getSignKey())
@@ -48,9 +49,11 @@ public class JwtUtil {
         .parseClaimsJws(token);
     String userDocument = claims.getBody().getSubject();
     String userRole = claims.getBody().get("role", String.class);
+    String userName = claims.getBody().get("name", String.class);
 
     request.setAttribute("loggedUserDocument", userDocument);
     request.setAttribute("loggedUserRole", userRole);
+    request.setAttribute("loggedUserName", userName);
     if (userDocument.length() > 0) {
       return new UsernamePasswordAuthenticationToken(userDocument, null, Collections.emptyList());
     }

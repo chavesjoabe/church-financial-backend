@@ -17,6 +17,7 @@ public class AccountingReportItemDto {
   private BalanceStatus status;
   private Instant balanceDate;
   private BalanceDescriptions description;
+  private String freeDescription;
   private BalanceIncomingTypes incomingType;
   private Float churchFirstLeaderPercentage;
   private Float churchSecondLeaderPercentage;
@@ -35,6 +36,7 @@ public class AccountingReportItemDto {
       BalanceStatus status,
       Instant balanceDate,
       BalanceDescriptions description,
+      String freeDescription,
       BalanceIncomingTypes incomingType) {
     this.balanceId = balanceId;
     this.type = type;
@@ -43,6 +45,7 @@ public class AccountingReportItemDto {
     this.status = status;
     this.balanceDate = balanceDate;
     this.description = description;
+    this.freeDescription = freeDescription;
     this.incomingType = incomingType;
     this.churchFirstLeaderPercentage = (float) (value * 0.125);
     this.churchSecondLeaderPercentage = (float) (value * 0.125);
@@ -59,6 +62,7 @@ public class AccountingReportItemDto {
     this.status = balance.getStatus();
     this.balanceDate = balance.getBalanceDate();
     this.description = balance.getDescription();
+    this.freeDescription = balance.getFreeDescription();
     this.incomingType = balance.getIncomingType();
     this.churchFirstLeaderPercentage = (float) (value * tax.getFirstLeaderPercentage());
     this.churchSecondLeaderPercentage = (float) (value * tax.getSecondLeaderPercentage());
@@ -121,6 +125,14 @@ public class AccountingReportItemDto {
 
   public void setDescription(BalanceDescriptions description) {
     this.description = description;
+  }
+
+  public String getFreeDescription() {
+    return freeDescription;
+  }
+
+  public void setFreeDescription(String freeDescription) {
+    this.freeDescription = freeDescription;
   }
 
   public BalanceIncomingTypes getIncomingType() {
