@@ -100,11 +100,13 @@ public class BalanceServiceTest {
         BalanceIncomingTypes.OFICIAL);
 
     String loggedDocument = "123123";
+    String loggedUserName = "TEST";
 
-    Balance result = balanceService.create(balanceDto, loggedDocument, "", "TESTE");
+    Balance result = balanceService.create(balanceDto, loggedDocument, "", loggedUserName);
 
     assertEquals(result.getValue(), 333);
     assertEquals(result.getResponsible(), loggedDocument);
+    assertEquals(result.getResponsibleName(), loggedUserName);
   }
 
   @Test
