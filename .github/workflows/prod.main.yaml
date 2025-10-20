@@ -57,6 +57,12 @@ jobs:
           echo "Building new JAR..."
           ./mvnw clean package -DskipTests
           
+          echo "stoping the application"
+          sudo systemctl stop church-financial
+
+          echo "removing the old jar file"
+          rm -rf /root/application/church-financial.jar
+
           echo "Updating deployed jar..."
           cp target/*.jar /root/application/church-financial.jar
           
