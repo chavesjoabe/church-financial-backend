@@ -2,7 +2,7 @@ package com.treasury.treasury.balance.dto;
 
 import java.time.Instant;
 
-import com.treasury.treasury.balance.constants.BalanceDescriptions;
+import com.treasury.treasury.balance.constants.PaymentMethods;
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
@@ -16,8 +16,8 @@ public class AccountingReportItemDto {
   private String responsible;
   private BalanceStatus status;
   private Instant balanceDate;
-  private BalanceDescriptions description;
-  private String freeDescription;
+  private PaymentMethods paymentMethod;
+  private String description;
   private BalanceIncomingTypes incomingType;
   private Float churchFirstLeaderPercentage;
   private Float churchSecondLeaderPercentage;
@@ -35,8 +35,8 @@ public class AccountingReportItemDto {
       String responsible,
       BalanceStatus status,
       Instant balanceDate,
-      BalanceDescriptions description,
-      String freeDescription,
+      PaymentMethods paymentMethod,
+      String description,
       BalanceIncomingTypes incomingType) {
     this.balanceId = balanceId;
     this.type = type;
@@ -44,8 +44,8 @@ public class AccountingReportItemDto {
     this.responsible = responsible;
     this.status = status;
     this.balanceDate = balanceDate;
+    this.paymentMethod = paymentMethod;
     this.description = description;
-    this.freeDescription = freeDescription;
     this.incomingType = incomingType;
     this.churchFirstLeaderPercentage = (float) (value * 0.125);
     this.churchSecondLeaderPercentage = (float) (value * 0.125);
@@ -61,8 +61,8 @@ public class AccountingReportItemDto {
     this.responsible = balance.getResponsible();
     this.status = balance.getStatus();
     this.balanceDate = balance.getBalanceDate();
+    this.paymentMethod = balance.getPaymentMethod();
     this.description = balance.getDescription();
-    this.freeDescription = balance.getFreeDescription();
     this.incomingType = balance.getIncomingType();
     this.churchFirstLeaderPercentage = (float) (value * tax.getFirstLeaderPercentage());
     this.churchSecondLeaderPercentage = (float) (value * tax.getSecondLeaderPercentage());
@@ -119,20 +119,20 @@ public class AccountingReportItemDto {
     this.balanceDate = balanceDate;
   }
 
-  public BalanceDescriptions getDescription() {
+  public PaymentMethods getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(PaymentMethods paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
+  public String getDescription() {
     return description;
   }
 
-  public void setDescription(BalanceDescriptions description) {
+  public void setDescription(String description) {
     this.description = description;
-  }
-
-  public String getFreeDescription() {
-    return freeDescription;
-  }
-
-  public void setFreeDescription(String freeDescription) {
-    this.freeDescription = freeDescription;
   }
 
   public BalanceIncomingTypes getIncomingType() {

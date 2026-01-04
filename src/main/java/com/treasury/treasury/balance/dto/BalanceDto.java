@@ -2,41 +2,41 @@ package com.treasury.treasury.balance.dto;
 
 import java.time.Instant;
 
-import com.treasury.treasury.balance.constants.BalanceDescriptions;
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceTypes;
+import com.treasury.treasury.balance.constants.PaymentMethods;
 
 public class BalanceDto {
   private BalanceTypes type;
   private Float value;
   private String responsible;
   private Instant balanceDate;
-  private BalanceDescriptions description;
-  private String freeDescription;
+  private String description;
   private BalanceIncomingTypes incomingType;
+  private PaymentMethods paymentMethod;
 
   public BalanceDto(
       BalanceTypes type,
       Float value,
       String responsible,
       Instant balanceDate,
-      BalanceDescriptions description,
-      String freeDescription,
-      BalanceIncomingTypes incomingTypes) {
+      String description,
+      BalanceIncomingTypes incomingTypes,
+      PaymentMethods paymentMethod) {
     this.type = type;
     this.value = value;
     this.responsible = responsible;
     this.balanceDate = balanceDate;
     this.description = description;
-    this.freeDescription = freeDescription;
-    this.incomingType= incomingTypes;
+    this.incomingType = incomingTypes;
+    this.paymentMethod = paymentMethod;
   }
 
-  public BalanceDescriptions getDescription() {
+  public String getDescription() {
     return description;
   }
 
-  public void setDescription(BalanceDescriptions description) {
+  public void setDescription(String description) {
     this.description = description;
   }
 
@@ -72,19 +72,19 @@ public class BalanceDto {
     this.balanceDate = balanceDate;
   }
 
-  public String getFreeDescription() {
-    return freeDescription;
-  }
-
-  public void setFreeDescription(String freeDescription) {
-    this.freeDescription = freeDescription;
-  }
-
   public BalanceIncomingTypes getIncomingType() {
     return incomingType;
   }
 
   public void setIncomingType(BalanceIncomingTypes incomingTypes) {
     this.incomingType = incomingTypes;
+  }
+
+  public PaymentMethods getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(PaymentMethods paymentMethod) {
+    this.paymentMethod = paymentMethod;
   }
 }

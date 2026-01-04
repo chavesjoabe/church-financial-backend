@@ -48,8 +48,8 @@ public class BalanceService {
         loggedUserDocument,
         loggedUserName,
         balanceDto.getBalanceDate(),
+        balanceDto.getPaymentMethod(),
         balanceDto.getDescription(),
-        balanceDto.getFreeDescription(),
         balanceDto.getIncomingType());
 
     logger.info(
@@ -61,6 +61,23 @@ public class BalanceService {
 
   public List<Balance> findAll() {
     return this.balanceRepository.findAll();
+  }
+
+  public List<Balance> findAllByDate(
+      Instant startDate,
+      Instant endDate,
+      String loggedUserDocument,
+      String loggedUserRole) {
+
+    if (UserRoles.COMMON.toString().equals(loggedUserRole)) {
+      return this.balanceRepository.findByBalanceDateBetweenAndResponsibleOrderByBalanceDate(
+          startDate,
+          endDate,
+          loggedUserDocument);
+
+    }
+
+    return this.balanceRepository.findByBalanceDateBetweenOrderByBalanceDate(startDate, endDate);
   }
 
   public Balance findById(String id) {
@@ -153,7 +170,7 @@ public class BalanceService {
     }
   }
 
-  public List<Balance> findAllBalancesByDate(Instant startDate, Instant endDate) {
+  public List<Balance> findAllApprovedBalancesByDate(Instant startDate, Instant endDate) {
     return this.balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(
         startDate,
         endDate,
