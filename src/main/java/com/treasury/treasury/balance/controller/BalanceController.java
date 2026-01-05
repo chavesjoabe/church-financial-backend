@@ -55,6 +55,25 @@ public class BalanceController {
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
+  @GetMapping("/all/date")
+  public ResponseEntity<List<Balance>> findAllByDate(
+      @RequestParam("startDate") String startDate,
+      @RequestParam("endDate") String endDate,
+      @RequestAttribute("loggedUserDocument") String loggedUserDocument,
+      @RequestAttribute("loggedUserRole") String loggedUserRole) {
+
+    Instant balanceStartDate = Instant.parse(startDate);
+    Instant balanceEndDate = Instant.parse(endDate);
+
+    List<Balance> balances = this.balanceService.findAllByDate(
+        balanceStartDate,
+        balanceEndDate,
+        loggedUserDocument,
+        loggedUserRole);
+
+    return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
+  }
+
   @GetMapping("/id/{id}")
   public ResponseEntity<Balance> findById(@PathVariable String id) {
     Balance balance = this.balanceService.findById(id);
@@ -118,7 +137,7 @@ public class BalanceController {
     Instant balanceStartDate = Instant.parse(startDate);
     Instant balanceEndDate = Instant.parse(endDate);
     List<Balance> balances = this.balanceService
-        .findAllBalancesByDate(
+        .findAllApprovedBalancesByDate(
             balanceStartDate,
             balanceEndDate);
 
@@ -152,4 +171,5 @@ public class BalanceController {
 
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
+
 }

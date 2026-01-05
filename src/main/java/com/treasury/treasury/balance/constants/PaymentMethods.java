@@ -1,6 +1,6 @@
 package com.treasury.treasury.balance.constants;
 
-public enum BalanceDescriptions {
+public enum PaymentMethods {
   PIX,
   MONEY,
   CARD,

@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.treasury.treasury.balance.constants.BalanceDescriptions;
+import com.treasury.treasury.balance.constants.PaymentMethods;
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
@@ -50,7 +50,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -62,7 +62,7 @@ public class BalanceServiceTest {
         (float) 333,
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -83,7 +83,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -95,7 +95,7 @@ public class BalanceServiceTest {
         (float) 333,
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -117,7 +117,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
     List<Balance> mockBalances = Arrays.asList(balance);
@@ -140,7 +140,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -150,7 +150,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -177,7 +177,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -187,7 +187,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -208,7 +208,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -227,7 +227,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 
@@ -251,7 +251,7 @@ public class BalanceServiceTest {
         "TESTE",
         "TESTE",
         Instant.now(),
-        BalanceDescriptions.PIX,
+        PaymentMethods.PIX,
         "Free description",
         BalanceIncomingTypes.OFICIAL);
 

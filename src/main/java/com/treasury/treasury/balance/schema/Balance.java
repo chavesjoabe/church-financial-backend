@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.treasury.treasury.balance.constants.BalanceDescriptions;
+import com.treasury.treasury.balance.constants.PaymentMethods;
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
@@ -24,8 +24,8 @@ public class Balance {
   private Instant updatedAt;
   private BalanceStatus status;
   private Instant balanceDate;
-  private BalanceDescriptions description;
-  private String freeDescription;
+  private PaymentMethods paymentMethod;
+  private String description;
   private String approvedBy;
   private Instant approvedAt;
   private BalanceIncomingTypes incomingType;
@@ -38,8 +38,8 @@ public class Balance {
       String responsible,
       String responsibleName,
       Instant balanceDate,
-      BalanceDescriptions description,
-      String freeDescription,
+      PaymentMethods paymentMethod,
+      String description,
       BalanceIncomingTypes incomingType) {
     this.id = UUID.randomUUID().toString();
     this.type = type;
@@ -50,8 +50,8 @@ public class Balance {
     this.updatedAt = Instant.now();
     this.status = BalanceStatus.PENDING;
     this.balanceDate = balanceDate;
+    this.paymentMethod = paymentMethod;
     this.description = description;
-    this.freeDescription = freeDescription;
     this.incomingType = incomingType;
   }
 
@@ -124,20 +124,20 @@ public class Balance {
     this.balanceDate = balanceDate;
   }
 
-  public BalanceDescriptions getDescription() {
+  public PaymentMethods getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(PaymentMethods description) {
+    this.paymentMethod = description;
+  }
+
+  public String getDescription() {
     return description;
   }
 
-  public void setDescription(BalanceDescriptions description) {
+  public void setDescription(String description) {
     this.description = description;
-  }
-
-  public String getFreeDescription() {
-    return freeDescription;
-  }
-
-  public void setFreeDescription(String freeDescription) {
-    this.freeDescription = freeDescription;
   }
 
   public String getApprovedBy() {
