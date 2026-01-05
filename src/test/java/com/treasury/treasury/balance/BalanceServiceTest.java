@@ -62,9 +62,9 @@ public class BalanceServiceTest {
         (float) 333,
         "TESTE",
         Instant.now(),
-        PaymentMethods.PIX,
         "Free description",
-        BalanceIncomingTypes.OFICIAL);
+        BalanceIncomingTypes.OFICIAL,
+        PaymentMethods.PIX);
 
     Balance result = balanceService.create(balanceDto, "", "", "");
 
@@ -95,9 +95,9 @@ public class BalanceServiceTest {
         (float) 333,
         "TESTE",
         Instant.now(),
-        PaymentMethods.PIX,
         "Free description",
-        BalanceIncomingTypes.OFICIAL);
+        BalanceIncomingTypes.OFICIAL,
+        PaymentMethods.PIX);
 
     String loggedDocument = "123123";
     String loggedUserName = "TEST";
@@ -159,14 +159,13 @@ public class BalanceServiceTest {
     Instant startDate = Instant.now();
     Instant endDate = Instant.now();
 
-    when(balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(startDate, endDate,
-        BalanceStatus.APPROVED)).thenReturn(mockBalances);
+    when(balanceRepository.findByBalanceDateBetweenOrderByBalanceDate(startDate, endDate)).thenReturn(mockBalances);
 
-    List<Balance> result = balanceService.findAllBalancesByDate(startDate, endDate);
+    List<Balance> result = balanceService.findAllByDate(startDate, endDate, "TESTE", "TESTE");
 
     assertEquals(2, result.size());
     verify(balanceRepository, times(1))
-        .findByBalanceDateBetweenAndStatusOrderByBalanceDate(startDate, endDate, BalanceStatus.APPROVED);
+        .findByBalanceDateBetweenOrderByBalanceDate(startDate, endDate);
   }
 
   @Test
