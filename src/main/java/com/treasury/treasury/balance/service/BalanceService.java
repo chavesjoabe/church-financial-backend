@@ -50,6 +50,7 @@ public class BalanceService {
         balanceDto.getBalanceDate(),
         balanceDto.getPaymentMethod(),
         balanceDto.getDescription(),
+        balanceDto.getCategory(),
         balanceDto.getIncomingType());
 
     logger.info(
