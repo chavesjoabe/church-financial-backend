@@ -14,6 +14,7 @@ public class BalanceDto {
   private String description;
   private BalanceIncomingTypes incomingType;
   private PaymentMethods paymentMethod;
+  private String category;
 
   public BalanceDto(
       BalanceTypes type,
@@ -22,6 +23,7 @@ public class BalanceDto {
       Instant balanceDate,
       String description,
       BalanceIncomingTypes incomingTypes,
+      String category,
       PaymentMethods paymentMethod) {
     this.type = type;
     this.value = value;
@@ -30,6 +32,7 @@ public class BalanceDto {
     this.description = description;
     this.incomingType = incomingTypes;
     this.paymentMethod = paymentMethod;
+    this.category = category;
   }
 
   public String getDescription() {
@@ -86,5 +89,13 @@ public class BalanceDto {
 
   public void setPaymentMethod(PaymentMethods paymentMethod) {
     this.paymentMethod = paymentMethod;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public void setCategory(String category) {
+    this.category = category;
   }
 }

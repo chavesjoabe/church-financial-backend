@@ -52,6 +52,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     when(balanceRepository.save(any(Balance.class)))
@@ -64,6 +65,7 @@ public class BalanceServiceTest {
         Instant.now(),
         "Free description",
         BalanceIncomingTypes.OFICIAL,
+        "TESTE",
         PaymentMethods.PIX);
 
     Balance result = balanceService.create(balanceDto, "", "", "");
@@ -85,6 +87,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     when(balanceRepository.save(any(Balance.class)))
@@ -97,6 +100,7 @@ public class BalanceServiceTest {
         Instant.now(),
         "Free description",
         BalanceIncomingTypes.OFICIAL,
+        "TESTE",
         PaymentMethods.PIX);
 
     String loggedDocument = "123123";
@@ -119,6 +123,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
     List<Balance> mockBalances = Arrays.asList(balance);
     // mock method
@@ -142,6 +147,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     Balance balance2 = new Balance(
@@ -152,6 +158,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     List<Balance> mockBalances = Arrays.asList(balance, balance2);
@@ -178,6 +185,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     Balance balance2 = new Balance(
@@ -188,6 +196,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     List<Balance> mockBalances = Arrays.asList(balance, balance2);
@@ -209,6 +218,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
@@ -228,6 +238,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     when(balanceRepository.findById("123"))
@@ -252,6 +263,7 @@ public class BalanceServiceTest {
         Instant.now(),
         PaymentMethods.PIX,
         "Free description",
+        "TESTE",
         BalanceIncomingTypes.OFICIAL);
 
     when(balanceRepository.findById("123"))

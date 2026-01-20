@@ -31,6 +31,7 @@ public class Balance {
   private BalanceIncomingTypes incomingType;
   private String rejectedBy;
   private Instant rejectedAt;
+  private String category;
 
   public Balance(
       BalanceTypes type,
@@ -40,6 +41,7 @@ public class Balance {
       Instant balanceDate,
       PaymentMethods paymentMethod,
       String description,
+      String category,
       BalanceIncomingTypes incomingType) {
     this.id = UUID.randomUUID().toString();
     this.type = type;
@@ -52,6 +54,7 @@ public class Balance {
     this.balanceDate = balanceDate;
     this.paymentMethod = paymentMethod;
     this.description = description;
+    this.category = category;
     this.incomingType = incomingType;
   }
 
@@ -95,8 +98,16 @@ public class Balance {
     this.responsibleName = responsibleName;
   }
 
+  public void setCategory(String category) {
+    this.category = category;
+  }
+
   public Instant getCreatedAt() {
     return createdAt;
+  }
+
+  public String getCategory() {
+    return category;
   }
 
   public Instant getUpdatedAt() {
