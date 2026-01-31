@@ -16,17 +16,17 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http
+    http
         .csrf((csrf) -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/user/login").permitAll()
             .requestMatchers("/api/balance/health").permitAll()
-            .anyRequest().authenticated()
-            ).cors();
+            .anyRequest().authenticated())
+        .cors();
 
-      http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
-      return http.build();
+    return http.build();
   }
 }

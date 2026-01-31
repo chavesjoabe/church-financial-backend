@@ -31,6 +31,7 @@
 	</properties>
 	<dependencies>
 
+    <!-- Spring Dependencies -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -46,20 +47,15 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
+    <!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-  	<dependency>
-		  <groupId>org.springframework.boot</groupId>
-		  <artifactId>spring-boot-starter-security</artifactId>
-	  </dependency>
+
+    <!-- Jwt -->
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
@@ -77,6 +73,24 @@
       <version>0.11.5</version>
       <scope>runtime</scope>
     </dependency>
+
+    <!-- Read OFX file -->
+    <dependency>
+      <groupId>com.webcohesion.ofx4j</groupId>
+      <artifactId>ofx4j</artifactId>
+      <version>1.36</version>
+    </dependency>
+
+    <!-- Test Dependencies -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+  	<dependency>
+		  <groupId>org.springframework.boot</groupId>
+		  <artifactId>spring-boot-starter-security</artifactId>
+	  </dependency>
 
     <!-- JUnit -->
     <dependency>

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
@@ -172,4 +173,34 @@ public class BalanceController {
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
+  @PostMapping("create/ofx")
+  public ResponseEntity<String> createByOfxFile(
+      @RequestParam("file") MultipartFile file,
+      @RequestAttribute("loggedUserDocument") String loggedUserDocument,
+      @RequestAttribute("loggedUserName") String loggedUserName) {
+    if (file.isEmpty()) {
+      System.out.println("EMPTY FILE");
+      return ResponseEntity.badRequest().body(null);
+    }
+
+    String fileName = file.getOriginalFilename();
+
+    int lastDotIndex = fileName.lastIndexOf(".");
+
+    String fileExtension = fileName.substring(lastDotIndex + 1);
+
+    System.out.println(fileExtension);
+    Boolean isInvalidFileExtension = !fileExtension.toLowerCase().equalsIgnoreCase("ofx");
+
+    System.out.println(isInvalidFileExtension);
+
+    if (isInvalidFileExtension) {
+      System.out.println("INCOMPATIBLE FILE TYPE");
+      return ResponseEntity.badRequest().body(null);
+    }
+
+    balanceService.processBalancesByOfxFile(file, loggedUserName, loggedUserDocument);
+
+    return ResponseEntity.ok("OK");
+  }
 }

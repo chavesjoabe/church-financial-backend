@@ -8,6 +8,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import com.treasury.treasury.balance.exceptions.OfxCreationException;
 import com.treasury.treasury.core.exceptionHandler.constants.ErrorConstantsEnum;
 import com.treasury.treasury.user.exceptions.UserAlreadyExistsException;
 import com.treasury.treasury.user.exceptions.UserNotFoundException;
@@ -32,12 +33,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       WebRequest request) {
     ApiError error = new ApiError(
         exception.getMessage(),
-        //"USER NOT FOUND",
+        // "USER NOT FOUND",
         ErrorConstantsEnum.USER_NOT_FOUND.toString(),
         ((ServletWebRequest) request).getRequest().getRequestURI(),
         HttpStatus.NOT_FOUND.value());
     exception.printStackTrace();
     return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(OfxCreationException.class)
+  public ResponseEntity<ApiError> handleOfxCreationException(OfxCreationException exception,
+      WebRequest request) {
+    ApiError error = new ApiError(
+        exception.getMessage(),
+        // "CREATE BALANCES FROM OFX FILE",
+        ErrorConstantsEnum.OFX_CREATION.toString(),
+        ((ServletWebRequest) request).getRequest().getRequestURI(),
+        HttpStatus.UNPROCESSABLE_ENTITY.value());
+    exception.printStackTrace();
+    return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
   }
 
   @ExceptionHandler(Exception.class)

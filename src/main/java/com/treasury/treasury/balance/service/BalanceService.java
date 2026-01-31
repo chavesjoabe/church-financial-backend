@@ -2,22 +2,30 @@ package com.treasury.treasury.balance.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
+import com.treasury.treasury.balance.constants.PaymentMethods;
 import com.treasury.treasury.balance.dto.AccountingReportItemDto;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.exceptions.OfxCreationException;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.commons.loggerService.LoggerService;
 import com.treasury.treasury.tax.schema.Tax;
 import com.treasury.treasury.tax.service.TaxService;
 import com.treasury.treasury.user.constants.UserRoles;
+import com.webcohesion.ofx4j.domain.data.ResponseEnvelope;
+import com.webcohesion.ofx4j.domain.data.banking.BankStatementResponseTransaction;
+import com.webcohesion.ofx4j.domain.data.common.Transaction;
+import com.webcohesion.ofx4j.io.AggregateUnmarshaller;
 
 @Service
 public class BalanceService {
@@ -269,5 +277,58 @@ public class BalanceService {
     }
 
     return this.balanceRepository.findByStatusOrderByBalanceDate(BalanceStatus.PENDING);
+  }
+
+  public List<Balance> processBalancesByOfxFile(
+      MultipartFile file,
+      String loggedUserName,
+      String loggedUserDocument) {
+    try {
+
+      AggregateUnmarshaller<ResponseEnvelope> aggregateUnmarshaller = new AggregateUnmarshaller<>(
+          ResponseEnvelope.class);
+
+      ResponseEnvelope result = aggregateUnmarshaller.unmarshal(file.getInputStream());
+
+      BankStatementResponseTransaction bankStatementResponseTransaction = (BankStatementResponseTransaction) result
+          .getMessageSets().getLast()
+          .getResponseMessages().getFirst();
+
+      List<Transaction> transactions = bankStatementResponseTransaction
+          .getMessage()
+          .getTransactionList()
+          .getTransactions();
+
+      if (transactions.isEmpty()) {
+        logger.info(BalanceService.class, "No balances to process from OFX file");
+        return null;
+      }
+
+      List<Balance> response = new ArrayList<>();
+
+      transactions.stream().forEach(transaction -> {
+        Balance balance = new Balance(
+            transaction.getAmount() > 0 ? BalanceTypes.INCOMING : BalanceTypes.OUTGOING,
+            (float) Math.abs(transaction.getAmount()),
+            loggedUserDocument,
+            loggedUserName,
+            transaction.getDatePosted().toInstant(),
+            PaymentMethods.MONEY,
+            transaction.getMemo(),
+            "IMPORTAÇAO EXTRATO",
+            BalanceIncomingTypes.OFICIAL);
+
+        balanceRepository.save(balance);
+        response.add(balance);
+      });
+
+      logger.info(BalanceService.class, "Total of: " + response.size() + " balances imported via OFX file");
+
+      return response;
+
+    } catch (Exception exception) {
+      logger.error(BalanceService.class, "ERROR ON PROCESS OFX FILE");
+      throw new OfxCreationException();
+    }
   }
 }
