@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,11 +19,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
 
+@EnableMethodSecurity
 @RestController
 @RequestMapping("api/balance")
 @CrossOrigin(origins = "*")
@@ -117,6 +121,7 @@ public class BalanceController {
     return new ResponseEntity<>(balances, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/report/accounting")
   public ResponseEntity<AccountingReportItemV2Dto> extractAccountingReportV2(
       @RequestParam("startDate") String startDate,
@@ -131,6 +136,7 @@ public class BalanceController {
     return new ResponseEntity<AccountingReportItemV2Dto>(response, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/report/incoming_outgoing")
   public ResponseEntity<List<Balance>> findAllBalancesByDate(
       @RequestParam("startDate") String startDate,
@@ -145,6 +151,7 @@ public class BalanceController {
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/report/incoming")
   public ResponseEntity<List<Balance>> findAllIncomingBalancesByDate(
       @RequestParam("startDate") String startDate,
@@ -159,6 +166,7 @@ public class BalanceController {
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/report/outgoing")
   public ResponseEntity<List<Balance>> findAllOutgoingBalancesByDate(
       @RequestParam("startDate") String startDate,
@@ -173,6 +181,7 @@ public class BalanceController {
     return new ResponseEntity<List<Balance>>(balances, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("create/ofx")
   public ResponseEntity<String> createByOfxFile(
       @RequestParam("file") MultipartFile file,
@@ -203,4 +212,33 @@ public class BalanceController {
 
     return ResponseEntity.ok("OK");
   }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("approve/massive")
+  public ResponseEntity<List<String>> approveMassive(
+      @RequestBody List<String> toApproveIds,
+      @RequestAttribute("loggedUserDocument") String loggedUserDocument) {
+    List<String> response = balanceService
+        .approveOrRejectMassive(
+            toApproveIds,
+            BalanceStatus.APPROVED,
+            loggedUserDocument);
+
+    return ResponseEntity.ok().body(response);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("reject/massive")
+  public ResponseEntity<List<String>> rejectMassive(
+      @RequestBody List<String> toRejectIds,
+      @RequestAttribute("loogedUseDocument") String loggedUserDocument) {
+    List<String> response = balanceService
+        .approveOrRejectMassive(
+            toRejectIds,
+            BalanceStatus.REJECTED,
+            loggedUserDocument);
+
+    return ResponseEntity.ok().body(response);
+  }
+
 }

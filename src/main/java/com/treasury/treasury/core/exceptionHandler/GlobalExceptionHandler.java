@@ -2,6 +2,7 @@ package com.treasury.treasury.core.exceptionHandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -52,6 +53,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatus.UNPROCESSABLE_ENTITY.value());
     exception.printStackTrace();
     return new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
+  }
+
+  @ExceptionHandler(AuthorizationDeniedException.class)
+  public ResponseEntity<ApiError> handleAuthorizationDenied(AuthorizationDeniedException exception,
+      WebRequest request) {
+    ApiError error = new ApiError(
+        exception.getMessage(),
+        // REQUEST A METHOD WITHOUT ADMIN ROLE
+        ErrorConstantsEnum.AUTHORIZATION_DENIED.toString(),
+        ((ServletWebRequest) request).getRequest().getRequestURI(),
+        HttpStatus.FORBIDDEN.value());
+    exception.printStackTrace();
+    return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
   }
 
   @ExceptionHandler(Exception.class)

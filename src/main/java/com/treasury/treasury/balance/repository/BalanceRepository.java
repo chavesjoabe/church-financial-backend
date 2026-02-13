@@ -2,6 +2,7 @@ package com.treasury.treasury.balance.repository;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -39,4 +40,6 @@ public interface BalanceRepository extends MongoRepository<Balance, String> {
   List<Balance> findByStatusOrderByBalanceDate(BalanceStatus status);
 
   List<Balance> findByStatusAndResponsibleOrderByBalanceDate(BalanceStatus status, String responsible);
+
+  Optional<Balance> findByExternalId(String externalId);
 }

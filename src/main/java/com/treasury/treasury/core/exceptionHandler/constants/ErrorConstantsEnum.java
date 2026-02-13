@@ -5,4 +5,5 @@ public enum ErrorConstantsEnum {
   USER_NOT_FOUND,
   INTERNAL_SERVER_ERROR,
   OFX_CREATION,
+  AUTHORIZATION_DENIED,
 }
