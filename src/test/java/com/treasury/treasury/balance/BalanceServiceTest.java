@@ -44,16 +44,18 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldCreateANewBalance() {
-    Balance sampleBalance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance sampleBalance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     when(balanceRepository.save(any(Balance.class)))
         .thenReturn(sampleBalance);
@@ -78,17 +80,20 @@ public class BalanceServiceTest {
         .save(any());
   }
 
+  @Test
   public void ShouldCreateBalanceAndGetResponsibleFromParameter() {
-    Balance sampleBalance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance sampleBalance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("123123")
+        .responsibleName("TEST")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     when(balanceRepository.save(any(Balance.class)))
         .thenReturn(sampleBalance);
@@ -103,28 +108,31 @@ public class BalanceServiceTest {
         "TESTE",
         PaymentMethods.PIX);
 
-    String loggedDocument = "123123";
+    String loggedUserDocument = "123123";
     String loggedUserName = "TEST";
 
-    Balance result = balanceService.create(balanceDto, loggedDocument, "", loggedUserName);
+    Balance result = balanceService.create(balanceDto, loggedUserDocument, "", loggedUserName);
 
     assertEquals(result.getValue(), 333);
-    assertEquals(result.getResponsible(), loggedDocument);
+    assertEquals(result.getResponsible(), loggedUserDocument);
     assertEquals(result.getResponsibleName(), loggedUserName);
   }
 
   @Test
   public void ShouldReturnAllPendingBalances() {
-    Balance balance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance balance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
+
     List<Balance> mockBalances = Arrays.asList(balance);
     // mock method
     when(balanceRepository.findByStatusOrderByBalanceDate(BalanceStatus.PENDING)).thenReturn(mockBalances);
@@ -139,27 +147,31 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldReturnAllBalancesByDate() {
-    Balance balance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance balance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
-    Balance balance2 = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance balance2 = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     List<Balance> mockBalances = Arrays.asList(balance, balance2);
 
@@ -177,27 +189,31 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldFindAllBalances() {
-    Balance balance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance balance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
-    Balance balance2 = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance balance2 = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     List<Balance> mockBalances = Arrays.asList(balance, balance2);
     when(balanceRepository.findAll()).thenReturn(mockBalances);
@@ -210,16 +226,18 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldApproveBalance() {
-    Balance sampleBalance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance sampleBalance = Balance
+        .builder()
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
     when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
@@ -230,16 +248,20 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldRejectBalance() {
-    Balance sampleBalance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance sampleBalance = Balance
+        .builder()
+        .id("123")
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .status(BalanceStatus.PENDING)
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     when(balanceRepository.findById("123"))
         .thenReturn(Optional.of(sampleBalance));
@@ -255,23 +277,31 @@ public class BalanceServiceTest {
 
   @Test
   public void ShouldRemoveBalance() {
-    Balance sampleBalance = new Balance(
-        BalanceTypes.INCOMING,
-        (float) 333,
-        "TESTE",
-        "TESTE",
-        Instant.now(),
-        PaymentMethods.PIX,
-        "Free description",
-        "TESTE",
-        BalanceIncomingTypes.OFICIAL);
+    Balance sampleBalance = Balance
+        .builder()
+        .id("123")
+        .type(BalanceTypes.INCOMING)
+        .value((float) 333)
+        .responsible("TESTE")
+        .responsibleName("TESTE")
+        .balanceDate(Instant.now())
+        .paymentMethod(PaymentMethods.PIX)
+        .description("Free description")
+        .status(BalanceStatus.PENDING)
+        .category("TESTE")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
 
     when(balanceRepository.findById("123"))
         .thenReturn(Optional.of(sampleBalance));
     when(balanceRepository.save(any(Balance.class)))
         .thenReturn(sampleBalance);
 
-    Balance response = balanceService.removeBalance("123", "TESTE 2", UserRoles.ADMIN.toString());
+    Balance response = balanceService.removeBalance(
+        "123",
+        "TESTE 2",
+        UserRoles.ADMIN.toString());
+
     assertEquals(response.getStatus(), BalanceStatus.REMOVED);
   }
 }

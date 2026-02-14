@@ -141,7 +141,7 @@ public class BalanceService {
           .orElseThrow(() -> new RuntimeException("Balance not found"));
 
       if (balance.getStatus().toString().equals(BalanceStatus.APPROVED.toString())) {
-        String errorMessage = "CANNOT REJECT AN APPROVED BALANCE";
+        String errorMessage = "CANNOT REJECT AN APPROVED BALANCE ";
         throw new RuntimeException(errorMessage);
       }
 
@@ -156,7 +156,7 @@ public class BalanceService {
       this.balanceRepository.save(balance);
       return balance;
     } catch (Exception e) {
-      String errorMessage = "ERROR ON REJECT BALANCE" + e.getMessage();
+      String errorMessage = "ERROR ON REJECT BALANCE - " + e.getMessage();
       throw new RuntimeException(errorMessage);
     }
   }
@@ -183,7 +183,7 @@ public class BalanceService {
       this.balanceRepository.save(balance);
       return balance;
     } catch (Exception e) {
-      String errorMessage = "ERROR ON REJECT BALANCE" + e.getMessage();
+      String errorMessage = "ERROR ON REJECT BALANCE - " + e.getMessage();
       throw new RuntimeException(errorMessage);
     }
   }
