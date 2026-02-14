@@ -7,6 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
@@ -50,16 +53,22 @@ public class BalanceService {
       String loggedUserRole,
       String loggedUserName) {
 
-    Balance balance = new Balance(
-        balanceDto.getType(),
-        balanceDto.getValue(),
-        loggedUserDocument,
-        loggedUserName,
-        balanceDto.getBalanceDate(),
-        balanceDto.getPaymentMethod(),
-        balanceDto.getDescription(),
-        balanceDto.getCategory(),
-        balanceDto.getIncomingType());
+    Balance balance = Balance
+        .builder()
+        .id(UUID.randomUUID().toString())
+        .type(balanceDto.getType())
+        .value(balanceDto.getValue())
+        .responsible(loggedUserDocument)
+        .responsibleName(loggedUserName)
+        .balanceDate(balanceDto.getBalanceDate())
+        .paymentMethod(balanceDto.getPaymentMethod())
+        .description(balanceDto.getDescription())
+        .category(balanceDto.getCategory())
+        .incomingType(balanceDto.getIncomingType())
+        .createdAt(Instant.now())
+        .updatedAt(Instant.now())
+        .status(BalanceStatus.PENDING)
+        .build();
 
     logger.info(
         BalanceService.class,
@@ -305,30 +314,70 @@ public class BalanceService {
       }
 
       List<Balance> response = new ArrayList<>();
+      AtomicInteger counter = new AtomicInteger(1);
 
       transactions.stream().forEach(transaction -> {
-        Balance balance = new Balance(
-            transaction.getAmount() > 0 ? BalanceTypes.INCOMING : BalanceTypes.OUTGOING,
-            (float) Math.abs(transaction.getAmount()),
-            loggedUserDocument,
-            loggedUserName,
-            transaction.getDatePosted().toInstant(),
-            PaymentMethods.MONEY,
-            transaction.getMemo(),
-            "IMPORTAÇAO EXTRATO",
-            BalanceIncomingTypes.OFICIAL);
+        logger.info(this.getClass(), "processing item " + counter + "/" + transactions.size());
 
-        balanceRepository.save(balance);
-        response.add(balance);
+        Balance balance = Balance
+            .builder()
+            .id(UUID.randomUUID().toString())
+            .type(transaction.getAmount() > 0 ? BalanceTypes.INCOMING : BalanceTypes.OUTGOING)
+            .value((float) Math.abs(transaction.getAmount()))
+            .responsible(loggedUserDocument)
+            .responsibleName(loggedUserName)
+            .balanceDate(transaction.getDatePosted().toInstant())
+            .paymentMethod(PaymentMethods.MONEY)
+            .description(transaction.getMemo())
+            .category("IMPORTAÇAO EXTRATO")
+            .incomingType(BalanceIncomingTypes.OFICIAL)
+            .createdAt(Instant.now())
+            .updatedAt(Instant.now())
+            .status(BalanceStatus.PENDING)
+            .externalId(transaction.getId())
+            .build();
+
+        Optional<Balance> existentBalance = balanceRepository
+            .findByExternalId(balance.getExternalId());
+
+        if (existentBalance.isPresent()) {
+          logger.info(this.getClass(), "Balance with external id - " + balance.getExternalId() + " already exists");
+          counter.incrementAndGet();
+        } else {
+          balanceRepository.save(balance);
+          response.add(balance);
+          counter.incrementAndGet();
+        }
       });
 
       logger.info(BalanceService.class, "Total of: " + response.size() + " balances imported via OFX file");
 
       return response;
-
     } catch (Exception exception) {
       logger.error(BalanceService.class, "ERROR ON PROCESS OFX FILE");
       throw new OfxCreationException();
     }
+  }
+
+  public List<String> approveOrRejectMassive(List<String> ids, BalanceStatus status, String loggedUserDocument) {
+    List<String> updatedIds = new ArrayList<>();
+
+    ids.stream().forEach(balanceId -> {
+      try {
+        Balance balance = balanceRepository.findById(balanceId).get();
+        balance.setStatus(status);
+
+        if (!balance.getResponsible().equals(loggedUserDocument)) {
+          balanceRepository.save(balance);
+          updatedIds.add(balanceId);
+        }
+      } catch (Exception exception) {
+        logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + balanceId);
+      }
+    });
+
+    logger.info(BalanceService.class, "TOTAL OF " + updatedIds.size() + " BALANCES UPDATED");
+
+    return updatedIds;
   }
 }

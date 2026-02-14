@@ -9,6 +9,7 @@ import com.treasury.treasury.user.constants.UserRoles;
 import com.treasury.treasury.user.dto.LoginDto;
 import com.treasury.treasury.user.dto.LoginResponse;
 import com.treasury.treasury.user.dto.UserDto;
+import com.treasury.treasury.user.dto.UserResponseDto;
 import com.treasury.treasury.user.exceptions.UserAlreadyExistsException;
 import com.treasury.treasury.user.exceptions.UserNotFoundException;
 import com.treasury.treasury.user.repository.UserRepository;
@@ -51,10 +52,18 @@ public class UserService {
     }
   }
 
-  public List<User> findAllUsers() {
+  public List<UserResponseDto> findAllUsers() {
     try {
       List<User> users = this.userRepository.findAll();
-      return users;
+
+      return users.stream().map(user -> new UserResponseDto(
+          user.getId(),
+          user.getName(),
+          user.getDocument(),
+          user.getIsActive(),
+          user.getEmail(),
+          user.getRole()))
+          .toList();
     } catch (Exception e) {
       String errorMessage = "Error on get all users - " + e.getMessage();
       throw new RuntimeException(errorMessage);

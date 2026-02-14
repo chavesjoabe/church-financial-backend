@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.treasury.treasury.user.constants.UserRoles;
@@ -54,8 +55,14 @@ public class JwtUtil {
     request.setAttribute("loggedUserDocument", userDocument);
     request.setAttribute("loggedUserRole", userRole);
     request.setAttribute("loggedUserName", userName);
+
+    var authority = new SimpleGrantedAuthority("ROLE_" + userRole);
+
     if (userDocument.length() > 0) {
-      return new UsernamePasswordAuthenticationToken(userDocument, null, Collections.emptyList());
+      return new UsernamePasswordAuthenticationToken(
+          userDocument,
+          null,
+          Collections.singletonList(authority));
     }
 
     return null;

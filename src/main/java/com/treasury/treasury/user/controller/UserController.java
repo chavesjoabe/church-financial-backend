@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.treasury.treasury.user.dto.LoginDto;
 import com.treasury.treasury.user.dto.LoginResponse;
 import com.treasury.treasury.user.dto.UserDto;
+import com.treasury.treasury.user.dto.UserResponseDto;
 import com.treasury.treasury.user.schema.User;
 import com.treasury.treasury.user.service.UserService;
 
@@ -55,9 +56,9 @@ class UserController {
   }
 
   @GetMapping("all")
-  public ResponseEntity<List<User>> findAllUsers() {
-    List<User> users = this.userService.findAllUsers();
-    return new ResponseEntity<List<User>>(users, HttpStatus.OK);
+  public ResponseEntity<List<UserResponseDto>> findAllUsers() {
+    List<UserResponseDto> users = this.userService.findAllUsers();
+    return new ResponseEntity<List<UserResponseDto>>(users, HttpStatus.OK);
   }
 
   @PutMapping("update/{document}")
@@ -65,8 +66,7 @@ class UserController {
       @PathVariable("document") String document,
       @RequestAttribute("loggedUserDocument") String loggedUserDocument,
       @RequestAttribute("loggedUserRole") String loggedUserRole,
-      @RequestBody UserDto userDto
-      ) {
+      @RequestBody UserDto userDto) {
     User response = this.userService.update(document, loggedUserDocument, loggedUserRole, userDto);
     return new ResponseEntity<User>(response, HttpStatus.OK);
   }
