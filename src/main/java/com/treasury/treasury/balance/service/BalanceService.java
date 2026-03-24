@@ -5,6 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +21,7 @@ import com.treasury.treasury.balance.constants.PaymentMethods;
 import com.treasury.treasury.balance.dto.AccountingReportItemDto;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.dto.DashboardDataDto;
 import com.treasury.treasury.balance.exceptions.OfxCreationException;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
@@ -379,5 +383,41 @@ public class BalanceService {
     logger.info(BalanceService.class, "TOTAL OF " + updatedIds.size() + " BALANCES UPDATED");
 
     return updatedIds;
+  }
+
+  public DashboardDataDto getDashboardData() {
+    LocalDate today = LocalDate.now();
+    Instant startDate = today
+        .with(TemporalAdjusters.firstDayOfMonth())
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant();
+
+    Instant endDate = today
+        .with(TemporalAdjusters.lastDayOfMonth())
+        .atTime(23, 59, 59)
+        .atZone(ZoneId.systemDefault())
+        .toInstant();
+
+    List<Balance> balances = this.balanceRepository
+        .findByBalanceDateBetweenAndStatusOrderByBalanceDate(
+            startDate,
+            endDate,
+            BalanceStatus.APPROVED);
+
+    float totalIncomings = 0f;
+    float totalOutgoings = 0f;
+
+    for (Balance balance : balances) {
+      if (BalanceTypes.INCOMING.equals(balance.getType())) {
+        totalIncomings += balance.getValue();
+      } else if (BalanceTypes.OUTGOING.equals(balance.getType())) {
+        totalOutgoings += balance.getValue();
+      }
+    }
+
+    return new DashboardDataDto(
+        totalIncomings,
+        totalOutgoings,
+        totalIncomings - totalOutgoings);
   }
 }

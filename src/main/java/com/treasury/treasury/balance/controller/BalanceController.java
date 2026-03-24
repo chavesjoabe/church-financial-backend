@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.dto.DashboardDataDto;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
 
@@ -239,6 +240,13 @@ public class BalanceController {
             loggedUserDocument);
 
     return ResponseEntity.ok().body(response);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @GetMapping("dashboard")
+  public ResponseEntity<DashboardDataDto> getDashboardData() {
+    DashboardDataDto response = balanceService.getDashboardData();
+    return ResponseEntity.ok(response);
   }
 
 }

@@ -20,6 +20,7 @@ import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.dto.DashboardDataDto;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
@@ -303,5 +304,28 @@ public class BalanceServiceTest {
         UserRoles.ADMIN.toString());
 
     assertEquals(response.getStatus(), BalanceStatus.REMOVED);
+  }
+
+  @Test
+  public void ShouldReturnDashboardData() {
+    Balance incoming = Balance.builder()
+        .type(BalanceTypes.INCOMING)
+        .value(1000f)
+        .status(BalanceStatus.APPROVED)
+        .build();
+    Balance outgoing = Balance.builder()
+        .type(BalanceTypes.OUTGOING)
+        .value(400f)
+        .status(BalanceStatus.APPROVED)
+        .build();
+
+    when(balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(any(), any(), eq(BalanceStatus.APPROVED)))
+        .thenReturn(Arrays.asList(incoming, outgoing));
+
+    DashboardDataDto result = balanceService.getDashboardData();
+
+    assertEquals(1000f, result.totalIncomings());
+    assertEquals(400f, result.totalOutgoings());
+    assertEquals(600f, result.totalBalance());
   }
 }
