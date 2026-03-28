@@ -114,6 +114,7 @@ public class BalanceController {
     return new ResponseEntity<Balance>(balance, HttpStatus.OK);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/update/{id}")
   public ResponseEntity<Balance> update(
       @PathVariable String id,
