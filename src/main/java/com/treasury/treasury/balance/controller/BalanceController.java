@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.dto.UpdateBalanceDto;
 import com.treasury.treasury.balance.dto.DashboardDataDto;
 import com.treasury.treasury.balance.schema.Balance;
 import com.treasury.treasury.balance.service.BalanceService;
@@ -110,6 +111,15 @@ public class BalanceController {
       @RequestAttribute("loggedUserDocument") String loggedUserDocument,
       @RequestAttribute("loggedUserRole") String loggedUserRole) {
     Balance balance = this.balanceService.removeBalance(id, loggedUserDocument, loggedUserRole);
+    return new ResponseEntity<Balance>(balance, HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("/update/{id}")
+  public ResponseEntity<Balance> update(
+      @PathVariable String id,
+      @RequestBody UpdateBalanceDto updateBalanceDto) {
+    Balance balance = this.balanceService.update(id, updateBalanceDto);
     return new ResponseEntity<Balance>(balance, HttpStatus.OK);
   }
 
