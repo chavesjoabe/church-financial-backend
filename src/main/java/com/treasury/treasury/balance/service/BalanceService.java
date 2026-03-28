@@ -22,6 +22,7 @@ import com.treasury.treasury.balance.dto.AccountingReportItemDto;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
 import com.treasury.treasury.balance.dto.DashboardDataDto;
+import com.treasury.treasury.balance.dto.UpdateBalanceDto;
 import com.treasury.treasury.balance.exceptions.OfxCreationException;
 import com.treasury.treasury.balance.repository.BalanceRepository;
 import com.treasury.treasury.balance.schema.Balance;
@@ -79,6 +80,30 @@ public class BalanceService {
         "new balance with id - " + balance.getId() + " created with success");
 
     return this.balanceRepository.save(balance);
+  }
+
+  @Transactional
+  public Balance update(String id, UpdateBalanceDto updateBalanceDto) {
+    try {
+      Balance balance = this.balanceRepository.findById(id)
+          .orElseThrow(() -> new RuntimeException("Balance not found"));
+
+      if (!balance.getStatus().equals(BalanceStatus.PENDING)) {
+        String errorMessage = "ONLY PENDING BALANCES CAN BE UPDATED";
+        throw new RuntimeException(errorMessage);
+      }
+
+      balance.setStatus(updateBalanceDto.status());
+      balance.setIncomingType(updateBalanceDto.incomingType());
+      balance.setCategory(updateBalanceDto.category());
+      balance.setDescription(updateBalanceDto.description());
+      balance.setUpdatedAt(Instant.now());
+
+      return this.balanceRepository.save(balance);
+    } catch (Exception e) {
+      String errorMessage = "Error on update balance " + e.getMessage();
+      throw new RuntimeException(errorMessage);
+    }
   }
 
   public List<Balance> findAll() {
@@ -320,39 +345,45 @@ public class BalanceService {
       List<Balance> response = new ArrayList<>();
       AtomicInteger counter = new AtomicInteger(1);
 
-      transactions.stream().forEach(transaction -> {
-        logger.info(this.getClass(), "processing item " + counter + "/" + transactions.size());
+      for (Transaction transaction : transactions) {
+        try {
+          logger.info(this.getClass(), "processing item " + counter + "/" + transactions.size());
 
-        Balance balance = Balance
-            .builder()
-            .id(UUID.randomUUID().toString())
-            .type(transaction.getAmount() > 0 ? BalanceTypes.INCOMING : BalanceTypes.OUTGOING)
-            .value((float) Math.abs(transaction.getAmount()))
-            .responsible(loggedUserDocument)
-            .responsibleName(loggedUserName)
-            .balanceDate(transaction.getDatePosted().toInstant())
-            .paymentMethod(PaymentMethods.MONEY)
-            .description(transaction.getMemo())
-            .category("IMPORTAÇAO EXTRATO")
-            .incomingType(BalanceIncomingTypes.OFICIAL)
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
-            .status(BalanceStatus.PENDING)
-            .externalId(transaction.getId())
-            .build();
+          Balance balance = Balance
+              .builder()
+              .id(UUID.randomUUID().toString())
+              .type(transaction.getAmount() > 0 ? BalanceTypes.INCOMING : BalanceTypes.OUTGOING)
+              .value((float) Math.abs(transaction.getAmount()))
+              .responsible(loggedUserDocument)
+              .responsibleName(loggedUserName)
+              .balanceDate(transaction.getDatePosted().toInstant())
+              .paymentMethod(PaymentMethods.MONEY)
+              .description(transaction.getMemo())
+              .category("IMPORTAÇAO EXTRATO")
+              .incomingType(BalanceIncomingTypes.OFICIAL)
+              .createdAt(Instant.now())
+              .updatedAt(Instant.now())
+              .status(BalanceStatus.PENDING)
+              .externalId(transaction.getId())
+              .build();
 
-        Optional<Balance> existentBalance = balanceRepository
-            .findByExternalId(balance.getExternalId());
+          Optional<Balance> existentBalance = balanceRepository
+              .findByExternalId(balance.getExternalId());
 
-        if (existentBalance.isPresent()) {
-          logger.info(this.getClass(), "Balance with external id - " + balance.getExternalId() + " already exists");
-          counter.incrementAndGet();
-        } else {
-          balanceRepository.save(balance);
-          response.add(balance);
-          counter.incrementAndGet();
+          if (existentBalance.isPresent()) {
+            logger.info(this.getClass(), "Balance with external id - " + balance.getExternalId() + " already exists");
+            counter.incrementAndGet();
+          } else {
+            balanceRepository.save(balance);
+            response.add(balance);
+            counter.incrementAndGet();
+          }
+
+        } catch (Exception e) {
+          logger.info(BalanceService.class, "Error on create balance with ID - " + transaction.getId());
+          continue;
         }
-      });
+      }
 
       logger.info(BalanceService.class, "Total of: " + response.size() + " balances imported via OFX file");
 

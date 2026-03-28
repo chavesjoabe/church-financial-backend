@@ -24,6 +24,7 @@ import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.constants.BalanceTypes;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
+import com.treasury.treasury.balance.dto.UpdateBalanceDto;
 import com.treasury.treasury.balance.dto.DashboardDataDto;
 import com.treasury.treasury.balance.exceptions.OfxCreationException;
 import com.treasury.treasury.balance.repository.BalanceRepository;
@@ -229,6 +230,54 @@ public class BalanceServiceTest {
 
     assertEquals(2, result.size());
     verify(balanceRepository, times(1)).findAll();
+  }
+
+  @Test
+  public void ShouldUpdateBalance() {
+    Balance sampleBalance = Balance
+        .builder()
+        .id("123")
+        .status(BalanceStatus.PENDING)
+        .category("OLD")
+        .description("OLD")
+        .incomingType(BalanceIncomingTypes.OFICIAL)
+        .build();
+
+    when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
+    when(balanceRepository.save(any(Balance.class))).thenReturn(sampleBalance);
+
+    UpdateBalanceDto updateDto = new UpdateBalanceDto(
+        BalanceStatus.PENDING,
+        BalanceIncomingTypes.NON_OFICIAL,
+        "NEW CATEGORY",
+        "NEW DESCRIPTION");
+
+    Balance result = balanceService.update("123", updateDto);
+
+    assertEquals(BalanceIncomingTypes.NON_OFICIAL, result.getIncomingType());
+    assertEquals("NEW CATEGORY", result.getCategory());
+    assertEquals("NEW DESCRIPTION", result.getDescription());
+    verify(balanceRepository).save(any(Balance.class));
+  }
+
+  @Test
+  public void ShouldThrowExceptionWhenUpdateBalanceNotPending() {
+    Balance sampleBalance = Balance
+        .builder()
+        .id("123")
+        .status(BalanceStatus.APPROVED)
+        .build();
+
+    when(balanceRepository.findById("123")).thenReturn(Optional.of(sampleBalance));
+
+    UpdateBalanceDto updateDto = new UpdateBalanceDto(
+        BalanceStatus.PENDING,
+        BalanceIncomingTypes.NON_OFICIAL,
+        "NEW CATEGORY",
+        "NEW DESCRIPTION");
+
+    assertThrows(RuntimeException.class, () -> balanceService.update("123", updateDto));
+    verify(balanceRepository, never()).save(any(Balance.class));
   }
 
   @Test
