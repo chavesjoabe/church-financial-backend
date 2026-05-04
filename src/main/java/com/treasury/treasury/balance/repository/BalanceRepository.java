@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
@@ -42,4 +43,7 @@ public interface BalanceRepository extends MongoRepository<Balance, String> {
   List<Balance> findByStatusAndResponsibleOrderByBalanceDate(BalanceStatus status, String responsible);
 
   Optional<Balance> findByExternalId(String externalId);
+
+  @Query(value = "{ 'externalId': { $in: ?0 } }", fields = "{ 'id': 1, 'externalId': 1 }")
+  List<Balance> findByExternalIdIn(List<String> externalIds);
 }

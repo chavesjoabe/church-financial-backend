@@ -11,8 +11,10 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
@@ -326,9 +328,9 @@ public class BalanceService {
       AggregateUnmarshaller<ResponseEnvelope> aggregateUnmarshaller = new AggregateUnmarshaller<>(
           ResponseEnvelope.class);
 
-      ResponseEnvelope result = aggregateUnmarshaller.unmarshal(file.getInputStream());
+      ResponseEnvelope responseEnvelope = aggregateUnmarshaller.unmarshal(file.getInputStream());
 
-      BankStatementResponseTransaction bankStatementResponseTransaction = (BankStatementResponseTransaction) result
+      BankStatementResponseTransaction bankStatementResponseTransaction = (BankStatementResponseTransaction) responseEnvelope
           .getMessageSets().getLast()
           .getResponseMessages().getFirst();
 
@@ -342,12 +344,27 @@ public class BalanceService {
         return null;
       }
 
-      List<Balance> response = new ArrayList<>();
+      List<String> externalIds = transactions.stream()
+          .map(Transaction::getId)
+          .toList();
+
+      List<Balance> existingBalances = balanceRepository.findByExternalIdIn(externalIds);
+      Set<String> existingExternalIds = existingBalances.stream()
+          .map(Balance::getExternalId)
+          .collect(Collectors.toSet());
+
+      List<Balance> result = new ArrayList<>();
       AtomicInteger counter = new AtomicInteger(1);
 
       for (Transaction transaction : transactions) {
         try {
           logger.info(this.getClass(), "processing item " + counter + "/" + transactions.size());
+
+          if (existingExternalIds.contains(transaction.getId())) {
+            logger.info(this.getClass(), "Balance with external id - " + transaction.getId() + " already exists");
+            counter.incrementAndGet();
+            continue;
+          }
 
           Balance balance = Balance
               .builder()
@@ -367,17 +384,8 @@ public class BalanceService {
               .externalId(transaction.getId())
               .build();
 
-          Optional<Balance> existentBalance = balanceRepository
-              .findByExternalId(balance.getExternalId());
-
-          if (existentBalance.isPresent()) {
-            logger.info(this.getClass(), "Balance with external id - " + balance.getExternalId() + " already exists");
-            counter.incrementAndGet();
-          } else {
-            balanceRepository.save(balance);
-            response.add(balance);
-            counter.incrementAndGet();
-          }
+          result.add(balance);
+          counter.incrementAndGet();
 
         } catch (Exception e) {
           logger.info(BalanceService.class, "Error on create balance with ID - " + transaction.getId());
@@ -385,9 +393,25 @@ public class BalanceService {
         }
       }
 
-      logger.info(BalanceService.class, "Total of: " + response.size() + " balances imported via OFX file");
+      List<Balance> balancesToSave = new ArrayList<>();
+      int batchSize = 400;
+      result.stream().forEach(item -> {
+        balancesToSave.add(item);
 
-      return response;
+        if (balancesToSave.size() == batchSize) {
+          logger.info(BalanceService.class, "Batch size reached saving data...");
+          balanceRepository.saveAll(balancesToSave);
+          String successMessage = String.format("Total of %d messages saved", balancesToSave.size());
+          logger.info(BalanceService.class, successMessage);
+          balancesToSave.clear();
+        }
+      });
+
+      balanceRepository.saveAll(balancesToSave);
+
+      logger.info(BalanceService.class, "Total of: " + result.size() + " balances imported via OFX file");
+
+      return result;
     } catch (Exception exception) {
       logger.error(BalanceService.class, "ERROR ON PROCESS OFX FILE");
       throw new OfxCreationException();
