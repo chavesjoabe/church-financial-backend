@@ -133,6 +133,15 @@ public class BalanceController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
+  @GetMapping("all/pending/import")
+  public ResponseEntity<List<Balance>> findAllOfxImportPendingBalances(
+      @RequestAttribute("loggedUserRole") String loggedUserRole) {
+    List<Balance> balances = this.balanceService.findAllOfxImportPendingBalances(loggedUserRole);
+
+    return new ResponseEntity<>(balances, HttpStatus.OK);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/report/accounting")
   public ResponseEntity<AccountingReportItemV2Dto> extractAccountingReportV2(
       @RequestParam("startDate") String startDate,

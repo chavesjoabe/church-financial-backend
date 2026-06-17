@@ -38,12 +38,17 @@ public interface BalanceRepository extends MongoRepository<Balance, String> {
       BalanceTypes balanceType,
       BalanceIncomingTypes incomingType);
 
-  List<Balance> findByStatusOrderByBalanceDate(BalanceStatus status);
+  List<Balance> findByStatusAndCategoryNotOrderByBalanceDate(BalanceStatus status, String category);
 
-  List<Balance> findByStatusAndResponsibleOrderByBalanceDate(BalanceStatus status, String responsible);
+  List<Balance> findByStatusAndResponsibleAndCategoryNotOrderByBalanceDate(
+      BalanceStatus status,
+      String responsible,
+      String category);
 
   Optional<Balance> findByExternalId(String externalId);
 
   @Query(value = "{ 'externalId': { $in: ?0 } }", fields = "{ 'id': 1, 'externalId': 1 }")
   List<Balance> findByExternalIdIn(List<String> externalIds);
+
+  List<Balance> findByStatusAndCategoryOrderByBalanceDate(BalanceStatus balanceStatus, String category);
 }
