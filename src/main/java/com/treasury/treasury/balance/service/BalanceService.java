@@ -10,7 +10,6 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -311,12 +310,23 @@ public class BalanceService {
   public List<Balance> findAllPendingBalances(String loggedUserDocument, String loggedUserRole) {
     if (UserRoles.COMMON.toString().equals(loggedUserRole)) {
       return this.balanceRepository
-          .findByStatusAndResponsibleOrderByBalanceDate(
+          .findByStatusAndResponsibleAndCategoryNotOrderByBalanceDate(
               BalanceStatus.PENDING,
-              loggedUserDocument);
+              loggedUserDocument,
+              "IMPORTAÇAO EXTRATO");
     }
 
-    return this.balanceRepository.findByStatusOrderByBalanceDate(BalanceStatus.PENDING);
+    return this.balanceRepository.findByStatusAndCategoryNotOrderByBalanceDate(BalanceStatus.PENDING,
+        "IMPORTAÇAO EXTRATO");
+  }
+
+  public List<Balance> findAllOfxImportPendingBalances(String loggedUserRole) {
+    if (!UserRoles.ADMIN.toString().equals(loggedUserRole)) {
+      return null;
+    }
+
+    return this.balanceRepository
+        .findByStatusAndCategoryOrderByBalanceDate(BalanceStatus.PENDING, "IMPORTAÇAO EXTRATO");
   }
 
   public List<Balance> processBalancesByOfxFile(
