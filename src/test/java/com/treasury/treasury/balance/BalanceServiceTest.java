@@ -143,14 +143,16 @@ public class BalanceServiceTest {
 
     List<Balance> mockBalances = Arrays.asList(balance);
     // mock method
-    when(balanceRepository.findByStatusOrderByBalanceDate(BalanceStatus.PENDING)).thenReturn(mockBalances);
+    when(balanceRepository
+        .findByStatusAndCategoryNotOrderByBalanceDate(BalanceStatus.PENDING, "IMPORTAÇAO EXTRATO"))
+        .thenReturn(mockBalances);
     // action
     List<Balance> result = balanceService.findAllPendingBalances("123123123",
         "ADMIN");
     // asserts
     assertEquals(1, result.size());
     verify(balanceRepository, times(1))
-        .findByStatusOrderByBalanceDate(BalanceStatus.PENDING);
+        .findByStatusAndCategoryNotOrderByBalanceDate(BalanceStatus.PENDING, "IMPORTAÇAO EXTRATO");
   }
 
   @Test
@@ -374,7 +376,8 @@ public class BalanceServiceTest {
         .status(BalanceStatus.APPROVED)
         .build();
 
-    when(balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(any(), any(), eq(BalanceStatus.APPROVED)))
+    when(
+        balanceRepository.findByBalanceDateBetweenAndStatusOrderByBalanceDate(any(), any(), eq(BalanceStatus.APPROVED)))
         .thenReturn(Arrays.asList(incoming, outgoing));
 
     DashboardDataDto result = balanceService.getDashboardData();
@@ -467,7 +470,8 @@ public class BalanceServiceTest {
     Instant start = Instant.now();
     Instant end = Instant.now();
     balanceService.findAllIncomingBalancesByDate(start, end);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.INCOMING);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.INCOMING);
   }
 
   @Test
@@ -475,7 +479,8 @@ public class BalanceServiceTest {
     Instant start = Instant.now();
     Instant end = Instant.now();
     balanceService.findAllOutgoingBalancesByDate(start, end);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.OUTGOING);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.OUTGOING);
   }
 
   @Test
@@ -486,7 +491,10 @@ public class BalanceServiceTest {
     balanceService.findAllPendingBalances(loggedUserDocument, loggedUserRole);
 
     verify(balanceRepository, times(1))
-        .findByStatusAndResponsibleOrderByBalanceDate(BalanceStatus.PENDING, loggedUserDocument);
+        .findByStatusAndResponsibleAndCategoryNotOrderByBalanceDate(
+            BalanceStatus.PENDING,
+            loggedUserDocument,
+            "IMPORTAÇAO EXTRATO");
   }
 
   @Test
@@ -537,10 +545,14 @@ public class BalanceServiceTest {
     AccountingReportItemV2Dto result = balanceService.extractAccountingReportV2(start, end);
 
     assertNotNull(result);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.OFICIAL);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.TRANSFER);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.TRANSFER_GEOL);
-    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end, BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.NON_OFICIAL);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.OFICIAL);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.TRANSFER);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.TRANSFER_GEOL);
+    verify(balanceRepository).findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(start, end,
+        BalanceStatus.APPROVED, BalanceTypes.INCOMING, BalanceIncomingTypes.NON_OFICIAL);
   }
 
   @Test
@@ -551,7 +563,8 @@ public class BalanceServiceTest {
     when(taxService.getTaxes()).thenReturn(mockTax);
 
     Balance b1 = Balance.builder().value(100f).build();
-    when(balanceRepository.findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(any(), any(), any(), any(), eq(BalanceIncomingTypes.OFICIAL)))
+    when(balanceRepository.findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(any(), any(),
+        any(), any(), eq(BalanceIncomingTypes.OFICIAL)))
         .thenReturn(Arrays.asList(b1));
 
     AccountingReportItemV2Dto result = balanceService.extractAccountingReportV2(start, end);
@@ -564,7 +577,8 @@ public class BalanceServiceTest {
   public void ShouldThrowExceptionWhenExtractAccountingReportV2Fails() {
     Instant start = Instant.now();
     Instant end = Instant.now();
-    when(balanceRepository.findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(any(), any(), any(), any(), any()))
+    when(balanceRepository.findByBalanceDateBetweenAndStatusAndTypeAndIncomingTypeOrderByBalanceDate(any(), any(),
+        any(), any(), any()))
         .thenThrow(new RuntimeException("DB Error"));
 
     assertThrows(RuntimeException.class, () -> balanceService.extractAccountingReportV2(start, end));
