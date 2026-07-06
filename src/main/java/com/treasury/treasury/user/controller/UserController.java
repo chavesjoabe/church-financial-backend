@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.treasury.treasury.user.dto.GetUserResponseDto;
 import com.treasury.treasury.user.dto.LoginDto;
 import com.treasury.treasury.user.dto.LoginResponse;
 import com.treasury.treasury.user.dto.UserDto;
@@ -50,9 +51,18 @@ class UserController {
   }
 
   @GetMapping("document/{document}")
-  public ResponseEntity<User> getUserByDocument(@PathVariable String document) {
+  public ResponseEntity<GetUserResponseDto> getUserByDocument(@PathVariable String document) {
     User user = this.userService.getUserByDocument(document);
-    return new ResponseEntity<User>(user, HttpStatus.OK);
+    GetUserResponseDto result = new GetUserResponseDto(
+        user.getCreatedAt().toString(),
+        user.getUpdatedAt().toString(),
+        user.getName(), user.getEmail(),
+        user.getDocument(),
+        user.getId(),
+        user.getIsActive(),
+        user.getRole());
+
+    return new ResponseEntity<GetUserResponseDto>(result, HttpStatus.OK);
   }
 
   @GetMapping("all")
