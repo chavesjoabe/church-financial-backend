@@ -262,6 +262,19 @@ public class BalanceController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("non-oficial/massive")
+  public ResponseEntity<List<String>> nonOficialMassive(
+      @RequestBody List<String> nonOficialIds,
+      @RequestAttribute("loggedUserDocument") String loggedUserDocument) {
+    List<String> response = balanceService
+        .setNonOficialMassive(
+            nonOficialIds,
+            loggedUserDocument);
+
+    return ResponseEntity.ok().body(response);
+  }
+
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("dashboard")
   public ResponseEntity<DashboardDataDto> getDashboardData() {
     DashboardDataDto response = balanceService.getDashboardData();

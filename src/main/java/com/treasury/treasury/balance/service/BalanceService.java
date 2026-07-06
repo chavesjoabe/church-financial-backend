@@ -450,6 +450,26 @@ public class BalanceService {
     return updatedIds;
   }
 
+  public List<String> setNonOficialMassive(List<String> ids, String loggedUserDocument) {
+    List<String> updatedIds = new ArrayList<>();
+
+    ids.stream().forEach(balanceId -> {
+      try {
+        Balance balance = balanceRepository.findById(balanceId).get();
+        balance.setIncomingType(BalanceIncomingTypes.NON_OFICIAL);
+
+        balanceRepository.save(balance);
+        updatedIds.add(balanceId);
+      } catch (Exception exception) {
+        logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + balanceId);
+      }
+    });
+
+    logger.info(BalanceService.class, "TOTAL OF " + updatedIds.size() + " BALANCES UPDATED");
+
+    return updatedIds;
+  }
+
   public DashboardDataDto getDashboardData() {
     LocalDate today = LocalDate.now();
     Instant startDate = today
