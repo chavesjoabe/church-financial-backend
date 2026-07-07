@@ -429,41 +429,96 @@ public class BalanceService {
   }
 
   public List<String> approveOrRejectMassive(List<String> ids, BalanceStatus status, String loggedUserDocument) {
+    if (ids == null || ids.isEmpty()) {
+      return new ArrayList<>();
+    }
+
     List<String> updatedIds = new ArrayList<>();
+    int batchSize = 100;
 
-    ids.stream().forEach(balanceId -> {
+    for (int i = 0; i < ids.size(); i += batchSize) {
+      List<String> batchIds = ids.subList(i, Math.min(i + batchSize, ids.size()));
       try {
-        Balance balance = balanceRepository.findById(balanceId).get();
-        balance.setStatus(status);
+        List<Balance> balances = balanceRepository.findAllById(batchIds);
 
-        if (!balance.getResponsible().equals(loggedUserDocument)) {
-          balanceRepository.save(balance);
-          updatedIds.add(balanceId);
+        Set<String> retrievedIds = balances.stream()
+            .map(Balance::getId)
+            .collect(Collectors.toSet());
+
+        for (String id : batchIds) {
+          if (!retrievedIds.contains(id)) {
+            logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + id);
+          }
+        }
+
+        List<Balance> balancesToSave = new ArrayList<>();
+        List<String> batchUpdatedIds = new ArrayList<>();
+
+        for (Balance balance : balances) {
+          if (!balance.getResponsible().equals(loggedUserDocument)) {
+            balance.setStatus(status);
+            balancesToSave.add(balance);
+            batchUpdatedIds.add(balance.getId());
+          }
+        }
+
+        if (!balancesToSave.isEmpty()) {
+          balanceRepository.saveAll(balancesToSave);
+          updatedIds.addAll(batchUpdatedIds);
         }
       } catch (Exception exception) {
-        logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + balanceId);
+        logger.error(BalanceService.class, "ERROR ON BATCH UPDATE BALANCES FOR IDS - " + batchIds);
       }
-    });
+    }
 
     logger.info(BalanceService.class, "TOTAL OF " + updatedIds.size() + " BALANCES UPDATED");
 
     return updatedIds;
   }
 
-  public List<String> setNonOficialMassive(List<String> ids, String loggedUserDocument) {
+  public List<String> setIncomingTypeMassive(List<String> ids, BalanceIncomingTypes incomingType, String loggedUserDocument) {
+    if (ids == null || ids.isEmpty()) {
+      return new ArrayList<>();
+    }
+
     List<String> updatedIds = new ArrayList<>();
+    int batchSize = 100;
 
-    ids.stream().forEach(balanceId -> {
+    for (int i = 0; i < ids.size(); i += batchSize) {
+      List<String> batchIds = ids.subList(i, Math.min(i + batchSize, ids.size()));
       try {
-        Balance balance = balanceRepository.findById(balanceId).get();
-        balance.setIncomingType(BalanceIncomingTypes.NON_OFICIAL);
+        List<Balance> balances = balanceRepository.findAllById(batchIds);
 
-        balanceRepository.save(balance);
-        updatedIds.add(balanceId);
+        Set<String> retrievedIds = balances.stream()
+            .map(Balance::getId)
+            .collect(Collectors.toSet());
+
+        for (String id : batchIds) {
+          if (!retrievedIds.contains(id)) {
+            logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + id);
+          }
+        }
+
+        List<Balance> balancesToSave = new ArrayList<>();
+        List<String> batchUpdatedIds = new ArrayList<>();
+
+        for (Balance balance : balances) {
+          if (BalanceTypes.OUTGOING.equals(balance.getType())) {
+            continue;
+          }
+          balance.setIncomingType(incomingType);
+          balancesToSave.add(balance);
+          batchUpdatedIds.add(balance.getId());
+        }
+
+        if (!balancesToSave.isEmpty()) {
+          balanceRepository.saveAll(balancesToSave);
+          updatedIds.addAll(batchUpdatedIds);
+        }
       } catch (Exception exception) {
-        logger.error(BalanceService.class, "ERROR ON UPDATE BALANCE WITH ID - " + balanceId);
+        logger.error(BalanceService.class, "ERROR ON BATCH UPDATE BALANCES FOR IDS - " + batchIds);
       }
-    });
+    }
 
     logger.info(BalanceService.class, "TOTAL OF " + updatedIds.size() + " BALANCES UPDATED");
 
