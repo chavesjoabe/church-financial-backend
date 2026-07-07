@@ -8,6 +8,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
@@ -502,37 +505,92 @@ public class BalanceServiceTest {
     Balance balance1 = Balance.builder().id("1").responsible("user1").build();
     Balance balance2 = Balance.builder().id("2").responsible("user1").build();
 
-    when(balanceRepository.findById("1")).thenReturn(Optional.of(balance1));
-    when(balanceRepository.findById("2")).thenReturn(Optional.of(balance2));
+    when(balanceRepository.findAllById(Arrays.asList("1", "2"))).thenReturn(Arrays.asList(balance1, balance2));
 
     List<String> ids = Arrays.asList("1", "2");
     List<String> result = balanceService.approveOrRejectMassive(ids, BalanceStatus.APPROVED, "user2");
 
     assertEquals(2, result.size());
-    verify(balanceRepository, times(2)).save(any(Balance.class));
+    verify(balanceRepository, times(1)).saveAll(anyList());
   }
 
   @Test
   public void ShouldNotUpdateBalanceInMassiveWhenResponsibleIsApprover() {
     Balance balance1 = Balance.builder().id("1").responsible("user1").build();
-    when(balanceRepository.findById("1")).thenReturn(Optional.of(balance1));
+    when(balanceRepository.findAllById(Arrays.asList("1"))).thenReturn(Arrays.asList(balance1));
 
     List<String> ids = Arrays.asList("1");
     List<String> result = balanceService.approveOrRejectMassive(ids, BalanceStatus.APPROVED, "user1");
 
     assertEquals(0, result.size());
-    verify(balanceRepository, never()).save(any(Balance.class));
+    verify(balanceRepository, never()).saveAll(anyList());
   }
 
   @Test
-  public void ShouldLogAndContinueInMassiveWhenErrorOccurs() {
-    when(balanceRepository.findById("1")).thenThrow(new RuntimeException("DB error"));
+  public void ShouldLogWhenBalanceNotFoundInMassive() {
+    when(balanceRepository.findAllById(Arrays.asList("1"))).thenReturn(Arrays.asList());
 
     List<String> ids = Arrays.asList("1");
     List<String> result = balanceService.approveOrRejectMassive(ids, BalanceStatus.APPROVED, "user1");
 
     assertEquals(0, result.size());
     verify(logger).error(eq(BalanceService.class), contains("ERROR ON UPDATE BALANCE WITH ID - 1"));
+  }
+
+  @Test
+  public void ShouldLogAndContinueInMassiveWhenErrorOccurs() {
+    when(balanceRepository.findAllById(anyList())).thenThrow(new RuntimeException("DB error"));
+
+    List<String> ids = Arrays.asList("1");
+    List<String> result = balanceService.approveOrRejectMassive(ids, BalanceStatus.APPROVED, "user1");
+
+    assertEquals(0, result.size());
+    verify(logger).error(eq(BalanceService.class), contains("ERROR ON BATCH UPDATE BALANCES FOR IDS - [1]"));
+  }
+
+  @Test
+  public void ShouldSetIncomingTypeMassive() {
+    Balance balance1 = Balance.builder().id("1").type(BalanceTypes.INCOMING).build();
+    Balance balance2 = Balance.builder().id("2").type(BalanceTypes.INCOMING).build();
+
+    when(balanceRepository.findAllById(Arrays.asList("1", "2"))).thenReturn(Arrays.asList(balance1, balance2));
+
+    List<String> ids = Arrays.asList("1", "2");
+    List<String> result = balanceService.setIncomingTypeMassive(ids, BalanceIncomingTypes.NON_OFICIAL, "user1");
+
+    assertEquals(2, result.size());
+    verify(balanceRepository, times(1)).saveAll(anyList());
+    assertEquals(BalanceIncomingTypes.NON_OFICIAL, balance1.getIncomingType());
+    assertEquals(BalanceIncomingTypes.NON_OFICIAL, balance2.getIncomingType());
+  }
+
+  @Test
+  public void ShouldLogWhenBalanceNotFoundInSetIncomingTypeMassive() {
+    when(balanceRepository.findAllById(Arrays.asList("1"))).thenReturn(Arrays.asList());
+
+    List<String> ids = Arrays.asList("1");
+    List<String> result = balanceService.setIncomingTypeMassive(ids, BalanceIncomingTypes.NON_OFICIAL, "user1");
+
+    assertEquals(0, result.size());
+    verify(logger).error(eq(BalanceService.class), contains("ERROR ON UPDATE BALANCE WITH ID - 1"));
+  }
+
+  @Test
+  public void ShouldNotUpdateOutgoingBalancesInIncomingTypeMassive() {
+    Balance incomingBalance = Balance.builder().id("1").type(BalanceTypes.INCOMING).build();
+    Balance outgoingBalance = Balance.builder().id("2").type(BalanceTypes.OUTGOING).build();
+
+    when(balanceRepository.findAllById(Arrays.asList("1", "2"))).thenReturn(Arrays.asList(incomingBalance, outgoingBalance));
+
+    List<String> ids = Arrays.asList("1", "2");
+    List<String> result = balanceService.setIncomingTypeMassive(ids, BalanceIncomingTypes.OFICIAL, "user1");
+
+    assertEquals(1, result.size());
+    assertTrue(result.contains("1"));
+    assertFalse(result.contains("2"));
+    verify(balanceRepository, times(1)).saveAll(anyList());
+    assertEquals(BalanceIncomingTypes.OFICIAL, incomingBalance.getIncomingType());
+    assertNull(outgoingBalance.getIncomingType());
   }
 
   @Test

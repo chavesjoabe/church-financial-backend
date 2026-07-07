@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.treasury.treasury.balance.constants.BalanceIncomingTypes;
 import com.treasury.treasury.balance.constants.BalanceStatus;
 import com.treasury.treasury.balance.dto.AccountingReportItemV2Dto;
 import com.treasury.treasury.balance.dto.BalanceDto;
@@ -262,13 +263,15 @@ public class BalanceController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @PutMapping("non-oficial/massive")
-  public ResponseEntity<List<String>> nonOficialMassive(
-      @RequestBody List<String> nonOficialIds,
+  @PutMapping("incoming-type/massive")
+  public ResponseEntity<List<String>> updateIncomingTypeMassive(
+      @RequestBody List<String> ids,
+      @RequestParam("incomingType") BalanceIncomingTypes incomingType,
       @RequestAttribute("loggedUserDocument") String loggedUserDocument) {
     List<String> response = balanceService
-        .setNonOficialMassive(
-            nonOficialIds,
+        .setIncomingTypeMassive(
+            ids,
+            incomingType,
             loggedUserDocument);
 
     return ResponseEntity.ok().body(response);
